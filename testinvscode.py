@@ -7,3 +7,5 @@ print(r+x)
 y = 7
 
 print(r+y)
+
+print("test")
