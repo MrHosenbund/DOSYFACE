@@ -1,14 +1,19 @@
 from tkinter import *
 
-
+#initate root window
 root  = Tk()
 
-#create a label widgeht
-first_label = Label(root, text="hello world")
-second_label = Label(root, text=" test")
+#define root window geometry
+root.geometry("9500x700")
+root.title("Browse Files & Display in Text Field")
 
 
-first_label.grid(row=0, column=0)
-second_label.grid(row=8, column=4)
+Button_Browse = Button(root, text="BROWSE", command=)
+
+#nicht fertig gestellt
+
+
+
 
 root.mainloop()
+
