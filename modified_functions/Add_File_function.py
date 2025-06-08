@@ -184,15 +184,115 @@ def import_file_integral_info(input_file):
         text_output_integral_info.insert(tk.END, "Kein Pfad angegeben.")
 
 
-#############################
-# #   PACK vs. FILL
-# | Option       | `pack()` | `grid()` | Bedeutung                         |
-# | ------------ | -------- | -------- | --------------------------------- |
-# | `side`       | ✅        | ❌        | Position im Container             |
-# | `fill`       | ✅        | ❌        | Widget füllt den Raum aus         |
-# | `expand`     | ✅        | ❌        | Widget dehnt sich mit Fenster     |
-# | `sticky`     | ❌        | ✅        | Ausrichtung innerhalb einer Zelle |
-# | `row/column` | ❌        | ✅        | Gitterposition                    |
+############################################
+#
+#
+#   ADD FILE FUNCTION
+#
+#
+###########################################
+
+###########################################
+#   ASSIGN VARIABLE TO ROWS & COLUMNS
+###########################################
+
+
+row_0 = 0
+row_1 = 1
+row_2 = 2
+
+
+
+
+# Global variables
+row_counter = 1  # Start counting from row 1 (since row 0 is used by the static UI)
+dynamic_rows = []  # List to store all widget groups for later deletion or reference
+
+def add_File():
+    global row_counter  # Make sure we use the global row counter
+
+    # --- Checkbuttons for experiment flags ---
+    button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")
+    button_gpz6.grid(row=row_counter, column=0, padx=5)  # Place in column 0 of current row
+
+    button_p30 = tk.Checkbutton(frame_buttons, text="p30")
+    button_p30.grid(row=row_counter, column=1, padx=5)  # Column 1
+
+    button_1H = tk.Checkbutton(frame_buttons, text="1H")
+    button_1H.grid(row=row_counter, column=2, padx=5)  # Column 2
+
+    button_19F = tk.Checkbutton(frame_buttons, text="19F")
+    button_19F.grid(row=row_counter, column=3, padx=5)  # Column 3
+
+    # --- Entry widget to display the file path ---
+    entry_path_new = tk.Entry(frame_buttons, width=40)
+    entry_path_new.grid(row=row_counter, column=4, padx=10)  # Column 4
+
+    # --- Browse button for selecting file ---
+    def browse_file_new():  # Local function tied to this row's entry field
+        filepath = filedialog.askopenfilename(
+            title="Datei auswählen", filetypes=[("Alle Dateien", "*.*")]
+        )
+        if filepath:  # If user selected a file
+            entry_path_new.delete(0, tk.END)  # Clear current entry
+            entry_path_new.insert(0, filepath)  # Insert new path
+
+    button_browse = tk.Button(frame_buttons, text="Durchsuchen", command=browse_file_new)
+    button_browse.grid(row=row_counter, column=5, padx=5)  # Column 5
+
+    # --- Import button that processes the selected file ---
+       # --- Updated Import button (with live output) ---
+    def Import_databutton_new():
+        filepath = entry_path_new.get()
+        if filepath:
+            try:
+                # --- Integral Info ---
+                info = extract_integral_info(filepath)
+                text_output_integral_info.delete("1.0", tk.END)
+                for line in info:
+                    text_output_integral_info.insert(tk.END, line + "\n")
+
+                # --- DataFrame ---
+                df = import_dataframe(filepath)
+                text_output_dataframe.delete("1.0", tk.END)
+                text_output_dataframe.insert(tk.END, df.to_string())
+
+            except Exception as e:
+                text_output_integral_info.delete("1.0", tk.END)
+                text_output_integral_info.insert(tk.END, f"Fehler:\n{e}")
+
+    button_import = tk.Button(frame_buttons, text="Import Info", command=Import_databutton_new)
+    button_import.grid(row=row_counter, column=6, padx=5)
+
+    # --- Delete button to remove this row of widgets ---
+    def delete_row():  # Destroys/hides all widgets of this row
+        widgets = [button_gpz6, button_p30, button_1H, button_19F,
+                   entry_path_new, button_browse, button_import, button_delete]
+        for widget in widgets:
+            widget.grid_forget()  # Hides the widget from the grid
+        dynamic_rows.remove(widgets)  # Remove from tracking list
+
+    button_delete = tk.Button(frame_buttons, text="Delete File", command=delete_row)
+    button_delete.grid(row=row_counter, column=7, padx=5)  # Column 7
+
+    # --- Save the entire row for potential later reference or cleanup ---
+    dynamic_rows.append([
+        button_gpz6, button_p30, button_1H, button_19F,
+        entry_path_new, button_browse, button_import, button_delete
+    ])
+
+    row_counter += 1  # Prepare for the next row to be added below
+
+
+
+
+
+
+###########################################
+#
+#   WINDOW BUTTON ASSIGNMENT
+#
+###########################################
 
 
 # Fenster
@@ -200,29 +300,52 @@ root = tk.Tk()
 root.title("Dateiimport")
 root.geometry("9000x700")
 
-# Rahmen für obere Zeile
+
+#topframe
 frame_top = tk.Frame(root)
-frame_top.grid(row=0, column=0,pady=10, padx=10)
+frame_top.grid(row=0, column=0, pady=10, padx=10)
 
-# Eingabefeld für Pfad
-entry_path = tk.Entry(frame_top, width=60)
-entry_path.grid(row=0, column=0,  padx=(0, 10))
+# Textlabel im top-frame
+label_info = tk.Label(frame_top, text="This is the topframe")
+label_info.grid(row=0, column=0)
 
-# Button: Durchsuchen
-button_browse = tk.Button(frame_top, text="Durchsuchen", command=browse_file)
-button_browse.grid(row=0, column=1, padx=(0, 10))
+# ----------- frame_buttons (alle Bedienelemente) -----------
+frame_buttons = tk.Frame(root)
+frame_buttons.grid(row=1, column=0, pady=10, padx=10)
 
-# Button: Import # Combined command : Import data & IMport INtegral information 
-button_import = tk.Button(frame_top, text="Import Data", command=Import_databutton)
-button_import.grid(row=0, column=2)
+# Checkbuttons & Buttons nebeneinander platzieren
+button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")
+button_gpz6.grid(row=0, column=0, padx=5)
+
+button_p30 = tk.Checkbutton(frame_buttons, text="p30")
+button_p30.grid(row=0, column=1, padx=5)
+
+button_1H = tk.Checkbutton(frame_buttons, text="1H")
+button_1H.grid(row=0, column=2, padx=5)
+
+button_19F = tk.Checkbutton(frame_buttons, text="19F")
+button_19F.grid(row=0, column=3, padx=5)
+
+entry_path = tk.Entry(frame_buttons, width=40)
+entry_path.grid(row=0, column=4, padx=10)
+
+button_browse = tk.Button(frame_buttons, text="Durchsuchen", command=browse_file)
+button_browse.grid(row=0, column=5, padx=5)
+
+button_import = tk.Button(frame_buttons, text="Import Info", command=Import_databutton)
+button_import.grid(row=0, column=6, padx=5)
+
+button_addFile = tk.Button(frame_buttons, text=" + Add File", command=add_File)
+button_addFile.grid(row=0, column=7, padx=5)
+
 
 # LabelFrame erzeugt einen Rahmen mit Titel
 frame_Integral_Info = tk.LabelFrame(root, text="Integral Info", padx=10, pady=10)
-frame_Integral_Info.grid(row=2, column=2, padx=10, pady=10  )
+frame_Integral_Info.grid(row=2, column=8, padx=10, pady=10  )
 
 # Scrollbares Textfeld innerhalb des beschrifteten Rahmens für Integral Info
 text_output_integral_info = scrolledtext.ScrolledText(frame_Integral_Info, wrap=tk.WORD, width=70, height=10)
-text_output_integral_info.grid(row=2, column=2, padx=10, pady=10 )
+text_output_integral_info.grid(row=2, column=8, padx=10, pady=10 )
 
 
 # Second Frame for second textbox
