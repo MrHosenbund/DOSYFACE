@@ -322,13 +322,6 @@ root = tk.Tk()
 root.title("DOSYFACE")
 root.geometry("9000x700")
 
-# topframe
-# frame_top = tk.LabelFrame(root)
-# frame_top.grid(row=0, column=0, pady=5, padx=5)
-
-# # Textlabel im top-frame
-# label_info = tk.Label(frame_top, text="This is the topframe")
-# label_info.grid(row=0, column=0)
 
 # ----------- frame_buttons (alle Bedienelemente) -----------
 frame_buttons = tk.LabelFrame(root)
@@ -364,16 +357,10 @@ button_addFile.grid(row=0, column=7, padx=5)
 frame_Info=tk.LabelFrame(root,text="Integral Information & Dataframe",pady=10,padx=10 )
 frame_Info.grid(row=0, column=1, rowspan=3,sticky="n")
 
-# # LabelFrame für Integral Info
-# frame_Integral_Info = tk.LabelFrame(root, text="Integral Info", padx=10, pady=10)
-# frame_Integral_Info.grid(row=0, column=2, rowspan=1, padx=10, pady=5, sticky="n")
 
 text_output_integral_info = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
 text_output_integral_info.grid(row=0, column=0)
 
-# # LabelFrame für Dataframe
-# frame_dataframe = tk.LabelFrame(root, text="Dataframe", padx=10, pady=10)
-# frame_dataframe.grid(row=1, column=2,rowspan=1, padx=10, pady=5, sticky="n")
 
 text_output_dataframe = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
 text_output_dataframe.grid(row=1, column=0)
