@@ -301,7 +301,7 @@ root.geometry("9000x700")
 
 # topframe
 frame_top = tk.Frame(root)
-frame_top.grid(row=0, column=0, pady=10, padx=10)
+frame_top.grid(row=0, column=0, pady=5, padx=5)
 
 # Textlabel im top-frame
 label_info = tk.Label(frame_top, text="This is the topframe")
@@ -309,7 +309,7 @@ label_info.grid(row=0, column=0)
 
 # ----------- frame_buttons (alle Bedienelemente) -----------
 frame_buttons = tk.Frame(root)
-frame_buttons.grid(row=1, column=0, pady=10, padx=10)
+frame_buttons.grid(row=1, column=0, pady=5, padx=5)
 
 # Checkbuttons & Buttons nebeneinander platzieren
 button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")
@@ -340,14 +340,14 @@ button_addFile.grid(row=0, column=7, padx=5)
 
 # LabelFrame für Integral Info
 frame_Integral_Info = tk.LabelFrame(root, text="Integral Info", padx=10, pady=10)
-frame_Integral_Info.grid(row=1, column=8, padx=10, pady=5, sticky="n")
+frame_Integral_Info.grid(row=1, column=1, padx=10, pady=5, sticky="n")
 
 text_output_integral_info = scrolledtext.ScrolledText(frame_Integral_Info, wrap=tk.WORD, width=70, height=10)
 text_output_integral_info.grid(row=0, column=0)
 
 # LabelFrame für Dataframe
 frame_dataframe = tk.LabelFrame(root, text="Dataframe", padx=10, pady=10)
-frame_dataframe.grid(row=2, column=8, padx=10, pady=5, sticky="n")
+frame_dataframe.grid(row=2, column=1, padx=10, pady=5, sticky="n")
 
 text_output_dataframe = scrolledtext.ScrolledText(frame_dataframe, wrap=tk.WORD, width=70, height=10)
 text_output_dataframe.grid(row=0, column=0)
