@@ -78,38 +78,39 @@ def import_dataframe(input_file): #imports data to dataframe, filters out all li
 
 
 
+
 ######################################
 #   IMPORT DATAFRAME INTO TEXT FIELD
 ######################################
+# Function to import a dataframe from a given file and display it in the GUI text field
 def import_file_dataframe(input_file):
-    # Holt den Pfad aus dem Eingabefeld (entry_path)
+    # Get the filepath from the entry field (GUI input field)
     filepath = entry_path.get()
-    
-    # Prüft, ob überhaupt ein Pfad eingegeben wurde
+
+    # Check if a filepath was actually provided
     if filepath:
         try:
-            # Extrahiert die "integral info"-Daten aus der Datei
+            # Call function to load and return the cleaned dataframe from the file
             dataframe = import_dataframe(filepath)
-                        
-            # Löscht alten Text im Ausgabefeld (Textfeld für Integral Info)
+
+            # Clear any previous content in the dataframe output text field
             text_output_dataframe.delete("1.0", tk.END)
-            
-            # Fügt Zeile für Zeile den extrahierten Inhalt in das Textfeld ein
-            for line in dataframe:
-                text_output_dataframe.insert(tk.END, dataframe.to_string())
-       # Fehlerbehandlung: Wenn z. B. Datei nicht gefunden oder nicht lesbar
+
+            # Insert the entire dataframe (as string) into the text widget (just once)
+            text_output_dataframe.insert(tk.END, dataframe.to_string())
+
+        # Handle exceptions if an error occurs during file loading or parsing
         except Exception as e:
-            # Vorherigen Inhalt löschen
+            # Clear any old content in the text field
             text_output_dataframe.delete("1.0", tk.END)
-            # Fehlermeldung ins Textfeld schreiben
+
+            # Display the error message in the text field
             text_output_dataframe.insert(tk.END, f"Fehler beim dataframe Import:\n{e}")
+
     else:
-        # Falls kein Pfad angegeben ist: Hinweis anzeigen
+        # If no filepath was entered, inform the user
         text_output_dataframe.delete("1.0", tk.END)
         text_output_dataframe.insert(tk.END, "Kein Pfad angegeben.")
-
-
-
 
 
 ###########################################
@@ -272,7 +273,7 @@ def add_File():
             widget.grid_forget()  # Hides the widget from the grid
         dynamic_rows.remove(widgets)  # Remove from tracking list
 
-    button_delete = tk.Button(frame_buttons, text="Delete File", command=delete_row)
+    button_delete = tk.Button(frame_buttons, text=" - Remove", command=delete_row)
     button_delete.grid(row=row_counter, column=7, padx=5)  # Column 7
 
     # --- Save the entire row for potential later reference or cleanup ---
@@ -286,8 +287,6 @@ def add_File():
 
 
 
-
-
 ###########################################
 #
 #   WINDOW BUTTON ASSIGNMENT
@@ -297,11 +296,10 @@ def add_File():
 
 # Fenster
 root = tk.Tk()
-root.title("Dateiimport")
+root.title("DOSYFACE")
 root.geometry("9000x700")
 
-
-#topframe
+# topframe
 frame_top = tk.Frame(root)
 frame_top.grid(row=0, column=0, pady=10, padx=10)
 
@@ -338,23 +336,24 @@ button_import.grid(row=0, column=6, padx=5)
 button_addFile = tk.Button(frame_buttons, text=" + Add File", command=add_File)
 button_addFile.grid(row=0, column=7, padx=5)
 
+# --- FIXED COLUMN for right-hand output section (column 8) ---
 
-# LabelFrame erzeugt einen Rahmen mit Titel
+# LabelFrame für Integral Info
 frame_Integral_Info = tk.LabelFrame(root, text="Integral Info", padx=10, pady=10)
-frame_Integral_Info.grid(row=2, column=8, padx=10, pady=10  )
+frame_Integral_Info.grid(row=1, column=8, padx=10, pady=5, sticky="n")
 
-# Scrollbares Textfeld innerhalb des beschrifteten Rahmens für Integral Info
 text_output_integral_info = scrolledtext.ScrolledText(frame_Integral_Info, wrap=tk.WORD, width=70, height=10)
-text_output_integral_info.grid(row=2, column=8, padx=10, pady=10 )
+text_output_integral_info.grid(row=0, column=0)
+
+# LabelFrame für Dataframe
+frame_dataframe = tk.LabelFrame(root, text="Dataframe", padx=10, pady=10)
+frame_dataframe.grid(row=2, column=8, padx=10, pady=5, sticky="n")
+
+text_output_dataframe = scrolledtext.ScrolledText(frame_dataframe, wrap=tk.WORD, width=70, height=10)
+text_output_dataframe.grid(row=0, column=0)
 
 
-# Second Frame for second textbox
-frame_dataframe = tk.LabelFrame(root, text="Dataframe",padx=10, pady=10)
-frame_dataframe.grid(row=3, column=2, padx=10, pady=10)
 
-#second textfield for dataframe
-text_output_dataframe = scrolledtext.ScrolledText(frame_dataframe,wrap=tk.WORD, width=70, height=10 )
-text_output_dataframe.grid(row=3, column=2, padx=10, pady=10)
 
 
 # GUI starten
