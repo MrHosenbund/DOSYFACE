@@ -7,6 +7,8 @@ import pandas as pd
 from io import StringIO
 from scipy.optimize import curve_fit
 from tkinter import *
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 
 
@@ -286,10 +288,31 @@ def add_File():
 
 
 
+def plot_into_frame(target_frame):
+    # Create a Matplotlib figure
+    fig = Figure(figsize=(5, 4), dpi=100)
+    ax = fig.add_subplot(111)
+
+    # Example data to plot
+    x = [1, 2, 3, 4, 5]
+    y = [10, 20, 15, 30, 25]
+    ax.plot(x, y, label="Example Curve")
+    ax.set_title("My Plot")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.legend()
+
+    # Embed the plot into the tkinter frame
+    canvas = FigureCanvasTkAgg(fig, master=target_frame)  # target_frame is a tk.Frame
+    canvas.draw()
+    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+
+
 
 ###########################################
 #
-#   WINDOW BUTTON ASSIGNMENT
+#        WINDOW COSMETICS / DESIGN
 #
 ###########################################
 
@@ -300,16 +323,16 @@ root.title("DOSYFACE")
 root.geometry("9000x700")
 
 # topframe
-frame_top = tk.Frame(root)
-frame_top.grid(row=0, column=0, pady=5, padx=5)
+# frame_top = tk.LabelFrame(root)
+# frame_top.grid(row=0, column=0, pady=5, padx=5)
 
-# Textlabel im top-frame
-label_info = tk.Label(frame_top, text="This is the topframe")
-label_info.grid(row=0, column=0)
+# # Textlabel im top-frame
+# label_info = tk.Label(frame_top, text="This is the topframe")
+# label_info.grid(row=0, column=0)
 
 # ----------- frame_buttons (alle Bedienelemente) -----------
-frame_buttons = tk.Frame(root)
-frame_buttons.grid(row=1, column=0, pady=5, padx=5)
+frame_buttons = tk.LabelFrame(root)
+frame_buttons.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
 
 # Checkbuttons & Buttons nebeneinander platzieren
 button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")
@@ -338,19 +361,42 @@ button_addFile.grid(row=0, column=7, padx=5)
 
 # --- FIXED COLUMN for right-hand output section (column 8) ---
 
-# LabelFrame für Integral Info
-frame_Integral_Info = tk.LabelFrame(root, text="Integral Info", padx=10, pady=10)
-frame_Integral_Info.grid(row=1, column=1, padx=10, pady=5, sticky="n")
+frame_Info=tk.LabelFrame(root,text="Integral Information & Dataframe",pady=10,padx=10 )
+frame_Info.grid(row=0, column=1, rowspan=3,sticky="n")
 
-text_output_integral_info = scrolledtext.ScrolledText(frame_Integral_Info, wrap=tk.WORD, width=70, height=10)
+# # LabelFrame für Integral Info
+# frame_Integral_Info = tk.LabelFrame(root, text="Integral Info", padx=10, pady=10)
+# frame_Integral_Info.grid(row=0, column=2, rowspan=1, padx=10, pady=5, sticky="n")
+
+text_output_integral_info = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
 text_output_integral_info.grid(row=0, column=0)
 
-# LabelFrame für Dataframe
-frame_dataframe = tk.LabelFrame(root, text="Dataframe", padx=10, pady=10)
-frame_dataframe.grid(row=2, column=1, padx=10, pady=5, sticky="n")
+# # LabelFrame für Dataframe
+# frame_dataframe = tk.LabelFrame(root, text="Dataframe", padx=10, pady=10)
+# frame_dataframe.grid(row=1, column=2,rowspan=1, padx=10, pady=5, sticky="n")
 
-text_output_dataframe = scrolledtext.ScrolledText(frame_dataframe, wrap=tk.WORD, width=70, height=10)
-text_output_dataframe.grid(row=0, column=0)
+text_output_dataframe = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
+text_output_dataframe.grid(row=1, column=0)
+
+#Graph Frame for Graph
+frame_Graph = tk.LabelFrame(root, text="Graphical Results",padx=0, pady=5 )
+frame_Graph.grid(row=1,column=0)
+
+# Frame for Matplotlib plot, below the button frame
+frame_plot = tk.Frame(root)
+frame_plot.grid(row=1, column=0, padx=10, pady=10, sticky="n")
+plot_into_frame(frame_plot)
+
+#Frame for results
+frame_results = tk.LabelFrame(root, text="Results",padx=0, pady=5)
+frame_results.grid(row=2,column=0)
+
+#textbox for results
+text_output_results = scrolledtext.ScrolledText(frame_results, wrap=tk.WORD, width=60, height=0.5)
+text_output_results.grid(row=0, column=0)
+
+
+
 
 
 
