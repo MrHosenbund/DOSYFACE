@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import StringIO
 from scipy.optimize import curve_fit
-from tkinter import *
+from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
@@ -360,6 +360,73 @@ text_output_integral_info.grid(row=0, column=0)
 
 text_output_dataframe = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
 text_output_dataframe.grid(row=1, column=0)
+
+
+
+##################################
+# VAR. ASSIGNMENT - BOTTOM RIGHT
+##################################
+
+#variable Assignment - Frame
+frame_input = tk.LabelFrame(root, text="Variables", padx=10, pady=10)
+frame_input.grid(row=2, column=1)
+
+#Fixed Values - Frame 
+frame_Fixed_Values = tk.Frame(frame_input,padx=2, pady=2)
+frame_Fixed_Values.grid(row=0, column=0)
+
+label_Fixed_values = tk.Label(frame_Fixed_Values, text="Fixd Values")
+label_Fixed_values.grid(row=0, column=0)
+
+#Label for fixed gpz6 - fixed gradient strength for gradient length variation experiments
+label_gpz6 = tk.Label(frame_Fixed_Values, text="gpz6 [%]")
+label_gpz6.grid(row=1,column=0)
+#Input field for gpz6 - tk.Entry = allows everything to be entered => I need to convert the string to float, 
+# In this case: String - to float ( precent number )
+entry_gpz6 = tk.Entry(frame_Fixed_Values,width=5 )                  # CONVERT STRING TO FLOAT
+entry_gpz6.grid(row=2, column=1)
+
+#Label for p30 - fixed gradient length for gpz6 variation experiments
+label_p30 = tk.Label(frame_Fixed_Values, text=r"p30 [μS]") #tkinter - does not present LaTeX style greek letters
+label_p30.grid(row=2, column=0)
+#Input field for fixed p30
+entry_p30 = tk.Entry(frame_Fixed_Values, width=5)                   #CONVERT STRING INTO FLOAT
+entry_p30.grid(row=1, column=1)
+
+#Label for initial guess regarding fit
+label_initial_guess = tk.Label(frame_Fixed_Values, text="in. guess")
+label_initial_guess.grid(row=3, column=0)
+#entry for initual guess   
+entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)         #CONVERT STRING INTO FLOAT - ALLOW 10^x == 10**9
+entry_initial_guess.grid(row=3,column=1)                            #Two ways of entering an exponent
+                                                                    #implement info which shows how to enter what exactly
+
+
+
+#SEPARATOR SHOULD SEPARATE FOLLOWING FRAMES FROM EACH OTHER:
+# FRAME - LEFT = frame_Fixed_Values  | FRAME RIGHT = frame_Variable_Values
+#Sticky"ns" is important to make it visible 
+
+ttk.Separator(frame_input,orient="vertical").grid(column=1,row=0,rowspan=4, sticky="ns") 
+
+#FRAME 2 - Variable p30 & gpz6
+frame_Variable_Values = tk.Frame(frame_input, padx=2, pady=2)
+frame_Variable_Values.grid(row=0, column=2)
+
+#Variable p30 Entry 
+label_p30_var = tk.Label(frame_Variable_Values, text="Var. p30 in:  ")
+label_p30_var.grid(row=0, column=0)
+
+p30_microSeconds = tk.Checkbutton(frame_Variable_Values, text="μS")
+p30_microSeconds.grid(row=0, column=1)
+
+p30_milliSeconds= tk.Checkbutton(frame_Variable_Values, text="mS")
+p30_milliSeconds.grid(row=0,column=2)
+
+p30_Seconds = tk.Checkbutton(frame_Variable_Values, text="S")
+p30_Seconds.grid(row=0,column=3)
+
+
 
 #Graph Frame for Graph
 frame_Graph = tk.LabelFrame(root, text="Graphical Results",padx=0, pady=5 )

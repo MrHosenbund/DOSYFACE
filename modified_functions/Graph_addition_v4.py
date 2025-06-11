@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import StringIO
 from scipy.optimize import curve_fit
-from tkinter import *
+from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
@@ -195,18 +195,6 @@ def import_file_integral_info(input_file):
 #
 ###########################################
 
-###########################################
-#   ASSIGN VARIABLE TO ROWS & COLUMNS
-###########################################
-
-
-row_0 = 0
-row_1 = 1
-row_2 = 2
-
-
-
-
 # Global variables
 row_counter = 1  # Start counting from row 1 (since row 0 is used by the static UI)
 dynamic_rows = []  # List to store all widget groups for later deletion or reference
@@ -307,6 +295,14 @@ def plot_into_frame(target_frame):
     canvas.draw()
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+############################################
+#
+#       NMR VARIABLE ASSIGNMENT
+#
+############################################
+
+gyro_mag_Ratio_1H = (2.675 * 10**8) #gyromagnetic ratio proton (s-1T-1)
+gyro_mag_Ratio_19F = (2.516 * 10**8) #gyromagnetic ratio proton (s-1T-1)
 
 
 
@@ -328,19 +324,19 @@ frame_buttons = tk.LabelFrame(root)
 frame_buttons.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
 
 # Checkbuttons & Buttons nebeneinander platzieren
-button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")
+button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")                    #COMMAND MISSING
 button_gpz6.grid(row=0, column=0, padx=5)
 
-button_p30 = tk.Checkbutton(frame_buttons, text="p30")
+button_p30 = tk.Checkbutton(frame_buttons, text="p30")                      #COMMAND MISSING
 button_p30.grid(row=0, column=1, padx=5)
 
-button_1H = tk.Checkbutton(frame_buttons, text="1H")
+button_1H = tk.Checkbutton(frame_buttons, text="1H")                        #COMMAND MISSING
 button_1H.grid(row=0, column=2, padx=5)
 
-button_19F = tk.Checkbutton(frame_buttons, text="19F")
+button_19F = tk.Checkbutton(frame_buttons, text="19F")                      #COMMAND MISSING
 button_19F.grid(row=0, column=3, padx=5)
 
-entry_path = tk.Entry(frame_buttons, width=40)
+entry_path = tk.Entry(frame_buttons, width=40)  
 entry_path.grid(row=0, column=4, padx=10)
 
 button_browse = tk.Button(frame_buttons, text="Durchsuchen", command=browse_file)
@@ -365,6 +361,70 @@ text_output_integral_info.grid(row=0, column=0)
 text_output_dataframe = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
 text_output_dataframe.grid(row=1, column=0)
 
+##################################
+# VAR. ASSIGNMENT - BOTTOM RIGHT
+##################################
+
+#variable Assignment - Frame
+frame_input = tk.LabelFrame(root, text="Variables", padx=10, pady=10)
+frame_input.grid(row=2, column=1)
+
+#Fixed Values - Frame 
+frame_Fixed_Values = tk.Frame(frame_input,padx=2, pady=2)
+frame_Fixed_Values.grid(row=0, column=0)
+
+label_Fixed_values = tk.Label(frame_Fixed_Values, text="Fixd Values")
+label_Fixed_values.grid(row=0, column=0)
+
+#Label for fixed gpz6 - fixed gradient strength for gradient length variation experiments
+label_gpz6 = tk.Label(frame_Fixed_Values, text="gpz6 [%]")
+label_gpz6.grid(row=1,column=0)
+#Input field for gpz6 - tk.Entry = allows everything to be entered => I need to convert the string to float, 
+# In this case: String - to float ( precent number )
+entry_gpz6 = tk.Entry(frame_Fixed_Values,width=5 )                  # CONVERT STRING TO FLOAT
+entry_gpz6.grid(row=2, column=1)
+
+#Label for p30 - fixed gradient length for gpz6 variation experiments
+label_p30 = tk.Label(frame_Fixed_Values, text=r"p30 [μS]") #tkinter - does not present LaTeX style greek letters
+label_p30.grid(row=2, column=0)
+#Input field for fixed p30
+entry_p30 = tk.Entry(frame_Fixed_Values, width=5)                   #CONVERT STRING INTO FLOAT
+entry_p30.grid(row=1, column=1)
+
+#Label for initial guess regarding fit
+label_initial_guess = tk.Label(frame_Fixed_Values, text="in. guess")
+label_initial_guess.grid(row=3, column=0)
+#entry for initual guess   
+entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)         #CONVERT STRING INTO FLOAT - ALLOW 10^x == 10**9
+entry_initial_guess.grid(row=3,column=1)                            #Two ways of entering an exponent
+                                                                    #implement info which shows how to enter what exactly
+
+
+
+#SEPARATOR SHOULD SEPARATE FOLLOWING FRAMES FROM EACH OTHER:
+# FRAME - LEFT = frame_Fixed_Values  | FRAME RIGHT = frame_Variable_Values
+#Sticky"ns" is important to make it visible 
+
+ttk.Separator(frame_input,orient="vertical").grid(column=1,row=0,rowspan=4, sticky="ns") 
+
+#FRAME 2 - Variable p30 & gpz6
+frame_Variable_Values = tk.Frame(frame_input, padx=2, pady=2)
+frame_Variable_Values.grid(row=0, column=2)
+
+#Variable p30 Entry 
+label_p30_var = tk.Label(frame_Variable_Values, text="Var. p30 in:  ")
+label_p30_var.grid(row=0, column=0)
+
+p30_microSeconds = tk.Checkbutton(frame_Variable_Values, text="μS")
+p30_microSeconds.grid(row=0, column=1)
+
+p30_milliSeconds= tk.Checkbutton(frame_Variable_Values, text="mS")
+p30_milliSeconds.grid(row=0,column=2)
+
+p30_Seconds = tk.Checkbutton(frame_Variable_Values, text="S")
+p30_Seconds.grid(row=0,column=3)
+
+
 #Graph Frame for Graph
 frame_Graph = tk.LabelFrame(root, text="Graphical Results",padx=0, pady=5 )
 frame_Graph.grid(row=1,column=0)
@@ -375,13 +435,12 @@ frame_plot.grid(row=1, column=0, padx=10, pady=10, sticky="n")
 plot_into_frame(frame_plot)
 
 #Frame for results
-frame_results = tk.LabelFrame(root, text="Results",padx=0, pady=5)
+frame_results = tk.LabelFrame(root, text="Diffusion Coefficient",padx=0, pady=5)
 frame_results.grid(row=2,column=0)
 
 #textbox for results
 text_output_results = scrolledtext.ScrolledText(frame_results, wrap=tk.WORD, width=60, height=0.5)
 text_output_results.grid(row=0, column=0)
-
 
 
 
