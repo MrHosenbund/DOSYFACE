@@ -42,15 +42,8 @@ def Import_Info_Button():
     extract_integral_info(filepath)
     import_file_dataframe(filepath)
     import_file_integral_info(filepath)
-
-
-################################################
-#   EXTRACTS DATAFRAME FROM TEXT 
-#################################################
-# 
-
-
-
+    update_gradient_label_on_import()
+    
 
 ###################################################
 #   EXTRACT DATAFRAME FROM TEXTFIELD
@@ -195,60 +188,59 @@ def import_file_integral_info(input_file):
 #
 ###########################################
 
-# Global variables
-row_counter = 1  # Start counting from row 1 (since row 0 is used by the static UI)
-dynamic_rows = []  # List to store all widget groups for later deletion or reference
+dynamic_rows = []  # Global list to track added rows
+row_counter = 1   # Also global row counter
+
+
 def add_File():
-    global row_counter  # Make sure we use the global row counter
+    global row_counter
 
-    # Create separate StringVars for this row's radiobutton groups
-    var_gradient = tk.StringVar(value="gpz6")  # default selection in gradient group
-    var_isotope = tk.StringVar(value="1H")     # default selection in isotope group
+    var_gradient = tk.StringVar(value="gpz6")
+    var_isotope = tk.StringVar(value="1H")
 
-    # --- Radiobuttons for experiment flags ---
     button_gpz6 = tk.Radiobutton(frame_data_import, text="gpz6", variable=var_gradient, value="gpz6")
-    button_gpz6.grid(row=row_counter, column=0, padx=5)  # Place in column 0 of current row
+    button_gpz6.grid(row=row_counter, column=0, padx=5)
 
     button_p30 = tk.Radiobutton(frame_data_import, text="p30", variable=var_gradient, value="p30")
-    button_p30.grid(row=row_counter, column=1, padx=5)  # Column 1
+    button_p30.grid(row=row_counter, column=1, padx=5)
 
     button_1H = tk.Radiobutton(frame_data_import, text="1H", variable=var_isotope, value="1H")
-    button_1H.grid(row=row_counter, column=2, padx=5)  # Column 2
+    button_1H.grid(row=row_counter, column=2, padx=5)
 
     button_19F = tk.Radiobutton(frame_data_import, text="19F", variable=var_isotope, value="19F")
-    button_19F.grid(row=row_counter, column=3, padx=5)  # Column 3
+    button_19F.grid(row=row_counter, column=3, padx=5)
 
-    # --- Entry widget to display the file path ---
     entry_path_new = tk.Entry(frame_data_import, width=40)
-    entry_path_new.grid(row=row_counter, column=4, padx=10)  # Column 4
+    entry_path_new.grid(row=row_counter, column=4, padx=10)
 
-    # --- Browse button for selecting file ---
-    def browse_file_new():  # Local function tied to this row's entry field
-        filepath = filedialog.askopenfilename(
-            title="Datei auswählen", filetypes=[("Alle Dateien", "*.*")]
-        )
-        if filepath:  # If user selected a file
-            entry_path_new.delete(0, tk.END)  # Clear current entry
-            entry_path_new.insert(0, filepath)  # Insert new path
+    def browse_file_new():
+        filepath = filedialog.askopenfilename(title="Datei auswählen", filetypes=[("Alle Dateien", "*.*")])
+        if filepath:
+            entry_path_new.delete(0, tk.END)
+            entry_path_new.insert(0, filepath)
 
     button_browse = tk.Button(frame_data_import, text="Browse", command=browse_file_new)
-    button_browse.grid(row=row_counter, column=5, padx=5)  # Column 5
+    button_browse.grid(row=row_counter, column=5, padx=5)
 
-    # --- Import button that processes the selected file ---
-    def Import_databutton_new():
+    # Important: Pass the local StringVars to this function via default args
+    def Import_databutton_new(local_var_gradient=var_gradient, local_var_isotope=var_isotope):
         filepath = entry_path_new.get()
         if filepath:
             try:
-                # --- Integral Info ---
                 info = extract_integral_info(filepath)
                 text_output_integral_info.delete("1.0", tk.END)
                 for line in info:
                     text_output_integral_info.insert(tk.END, line + "\n")
 
-                # --- DataFrame ---
                 df = import_dataframe(filepath)
                 text_output_dataframe.delete("1.0", tk.END)
                 text_output_dataframe.insert(tk.END, df.to_string())
+
+                # Use local StringVars here!
+                gradient = local_var_gradient.get()
+                isotope = local_var_isotope.get()
+                new_text = f"Variable Gradient: {gradient}\nIsotope: {isotope}"
+                Gradient_label.config(text=new_text)
 
             except Exception as e:
                 text_output_integral_info.delete("1.0", tk.END)
@@ -257,25 +249,24 @@ def add_File():
     button_import = tk.Button(frame_data_import, text="Import info", command=Import_databutton_new)
     button_import.grid(row=row_counter, column=6, padx=5)
 
-    # --- Delete button to remove this row of widgets ---
-    def delete_row():  # Destroys/hides all widgets of this row
+    # Rest of your code unchanged...
+    def delete_row():
         widgets = [button_gpz6, button_p30, button_1H, button_19F,
                    entry_path_new, button_browse, button_import, button_delete]
         for widget in widgets:
-            widget.grid_forget()  # Hides the widget from the grid
-        dynamic_rows.remove(widgets)  # Remove from tracking list
+            widget.grid_forget()
+        dynamic_rows.remove(widgets)
 
     button_delete = tk.Button(frame_data_import, text=" - Remove", command=delete_row)
-    button_delete.grid(row=row_counter, column=7, padx=5)  # Column 7
+    button_delete.grid(row=row_counter, column=7, padx=5)
 
-    # --- Save the entire row for potential later reference or cleanup ---
     dynamic_rows.append([
         button_gpz6, button_p30, button_1H, button_19F,
         entry_path_new, button_browse, button_import, button_delete,
-        var_gradient, var_isotope  # Save the StringVars too if needed
+        var_gradient, var_isotope
     ])
 
-    row_counter += 1  # Prepare for the next row to be added below
+    row_counter += 1
 
 
 
@@ -342,11 +333,17 @@ frame_data_import.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
 # Variable values are located in Frame_Valuable 
 
 
+def update_gradient_label_on_import():
+    gradient = Variable_gradient.get()  # "gpz6" or "p30"
+    isotope = Isotope_selection.get()   # "1H" or "19F"
+    new_text = f"Variable Gradient: {gradient}\nIsotope: {isotope}"
+    Gradient_label.config(text=new_text)
+
+
 
 
 Variable_gradient = tk.StringVar(value="gpz6")
 
-# Checkbuttons & Buttons nebeneinander platzieren
 button_gpz6 = tk.Radiobutton(frame_data_import, text="gpz6", variable=Variable_gradient, value="gpz6")
 button_gpz6.grid(row=0, column=0, padx=5)
 
@@ -424,10 +421,16 @@ def open_ChsANorm_Window():
     Normalized_Integral.grid(row=0, column=2, rowspan=1)
 
 
+frame_button_choose =tk.Frame(frame_Info)
+frame_button_choose.grid(row=2,column=0, sticky="w")
+button_choose = tk.Button(frame_button_choose, text="Open Choose & Normalize Window", command=open_ChsANorm_Window)
+button_choose.grid(row=0,column=0)
 
 
-
-
+frame_Gradient_Label =tk.Frame(frame_Info)
+frame_Gradient_Label.grid(row=2, column=0)
+Gradient_label = tk.Label(frame_Gradient_Label, text="Select a variable Gradient and Isotope")
+Gradient_label.grid(row=0,column=0)
 
 
 
