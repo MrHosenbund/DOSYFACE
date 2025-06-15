@@ -372,10 +372,10 @@ frame_input = tk.LabelFrame(root, text="Variables", padx=10, pady=10)
 frame_input.grid(row=2, column=1)
 
 #Fixed Values - Frame 
-frame_Fixed_Values = tk.Frame(frame_input,padx=2, pady=2)
+frame_Fixed_Values = tk.Frame(frame_input,padx=10, pady=10)
 frame_Fixed_Values.grid(row=0, column=0)
 
-label_Fixed_values = tk.Label(frame_Fixed_Values, text="Fixd Values")
+label_Fixed_values = tk.Label(frame_Fixed_Values, text="Fixed Variables")
 label_Fixed_values.grid(row=0, column=0)
 
 #Label for fixed gpz6 - fixed gradient strength for gradient length variation experiments
@@ -410,11 +410,11 @@ entry_initial_guess.grid(row=3,column=1)                            #Two ways of
 ttk.Separator(frame_input,orient="vertical").grid(column=1,row=0,rowspan=4, sticky="ns") 
 
 #FRAME 2 - Variable p30 & gpz6
-frame_Variable_Values = tk.Frame(frame_input, padx=2, pady=2)
+frame_Variable_Values = tk.Frame(frame_input, padx=10, pady=10)
 frame_Variable_Values.grid(row=0, column=2)
 
 #Variable p30 Entry 
-label_p30_var = tk.Label(frame_Variable_Values, text="Var. p30 in:  ")
+label_p30_var = tk.Label(frame_Variable_Values, text="Var. p30 increments: ")
 label_p30_var.grid(row=0, column=0)
 
 p30_microSeconds = tk.Checkbutton(frame_Variable_Values, text="μS")
@@ -426,11 +426,69 @@ p30_milliSeconds.grid(row=0,column=2)
 p30_Seconds = tk.Checkbutton(frame_Variable_Values, text="S")
 p30_Seconds.grid(row=0,column=3)
 
+Button_Converter = tk.Button(frame_Variable_Values, text="convert into S")         #CONVERT COMMAND MISSING
+Button_Converter.grid(row=1, column=4)
+
+
+#Entry Field - paste values into here
+entry_var_p30 = tk.Entry(frame_Variable_Values, width=40)
+entry_var_p30.grid(row=1, column=0, columnspan=4)
+
+#label for gpz6 var
+Label_gpz6_var = tk.Label(frame_Variable_Values, text="Var. gpz6 increments:")
+Label_gpz6_var.grid(row=2, column=0)
+
+entry_gpz6_var = tk.Entry(frame_Variable_Values, width=40)
+entry_gpz6_var.grid(row=3, column=0, columnspan=4)
+
+Label_entry_gpz6 =tk.Label(frame_Variable_Values, text="[T/m]")
+Label_entry_gpz6.grid(row=3, column=4)
+
+ttk.Separator(frame_input,orient="vertical").grid(column=3,row=0,rowspan=4, sticky="ns") 
+
+
+#Frame 3 within Variable_frame. 
+#This now contains Max T/m strength of the NMr device
+
+frame_NMR_settings = tk.Frame(frame_input, padx=10, pady=10)
+frame_NMR_settings.grid(row=0, column=4)
+
+label_Max_TpM = tk.Label(frame_NMR_settings, text= "Max T/m")
+label_Max_TpM.grid(row=0, column=0)
+
+entry_Max_TpM = tk.Entry(frame_NMR_settings, width=10)
+entry_Max_TpM.grid(row=0, column=1)
+
+label_Max_TpM_Percent = tk.Label(frame_NMR_settings, text="Max [%]")
+label_Max_TpM_Percent.grid(row=1, column=0)
+
+entry_Max_TpM_Percent = tk.Entry(frame_NMR_settings, width=10)
+entry_Max_TpM_Percent.grid(row=1, column=1) 
+
+label_Min_TpM_Percent = tk.Label(frame_NMR_settings, text="Min [%]")
+label_Min_TpM_Percent.grid(row=2, column=0)
+
+entry_Min_TpM_Percent = tk.Entry(frame_NMR_settings, width=10)
+entry_Min_TpM_Percent.grid(row=2, column=1)
+
+Label_Increments = tk.Label(frame_NMR_settings, text="#Increments")
+Label_Increments.grid(row=3, column=0)
+
+entry_Increments = tk.Entry(frame_NMR_settings, width=10)
+entry_Increments.grid(row=3, column=1)
+
+Button_Ignore = tk.Button(frame_NMR_settings, text="Ignore")
+Button_Ignore.grid(row=4, column=0)
+
+Button_Compute_Increments = tk.Button(frame_NMR_settings, text="Compute")
+Button_Compute_Increments.grid(row=4, column=1)
+
 
 
 #Graph Frame for Graph
 frame_Graph = tk.LabelFrame(root, text="Graphical Results",padx=0, pady=5 )
 frame_Graph.grid(row=1,column=0)
+
 
 # Frame for Matplotlib plot, below the button frame
 frame_plot = tk.Frame(root)
