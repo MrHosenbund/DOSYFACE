@@ -361,7 +361,78 @@ text_output_integral_info.grid(row=0, column=0)
 text_output_dataframe = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
 text_output_dataframe.grid(row=1, column=0)
 
+####################################
+#   VARIABLE FUNCTIONALITIES
+####################################
 
+
+###############################
+#   GPZ6 Increment Calculator
+###############################
+
+def compute_gpz6_increments():
+    try:
+        max_t = float(entry_Max_TpM.get())  # Max T/m absolute value
+        max_percent = float(entry_Max_TpM_Percent.get()) / 100.0  # convert percent to fraction
+        min_percent = float(entry_Min_TpM_Percent.get()) / 100.0
+        increments = int(entry_Increments.get())
+
+        # Calculate min and max absolute values
+        max_val = max_t * max_percent
+        min_val = max_t * min_percent
+
+        # Generate equidistant increments
+        gpz6_values = np.linspace(min_val, max_val, increments)
+
+        # Format output as a comma-separated string (or space-separated)
+        output_str = ", ".join(f"{v:.6f}" for v in gpz6_values)
+
+        # Clear the output entry and insert new values
+        entry_gpz6_var.delete(0, tk.END)
+        entry_gpz6_var.insert(0, output_str)
+
+        return gpz6_values
+
+    except Exception as e:
+        entry_gpz6_var.delete(0, tk.END)
+        entry_gpz6_var.insert(0, f"Error: {e}")
+        return None
+#es ist kein problem output aus rechnungen auch in entry field hinzuzufügen. 
+
+###################################
+#       VAR P30 CONVERTER
+###################################
+
+def  p30_converter():
+    try:
+        entry_p30_input = entry_var_p30.get()
+        str_values = [s.strip() for s in entry_p30_input.split(",")]
+        float_values = [float(val) for val in str_values]
+
+        unit = p30_selection.get()
+
+        if unit == "μs":
+            conversion_factor = 1e-6
+        elif unit == "ms":
+            conversion_factor = 1e-3
+        elif unit == "s":
+            conversion_factor = 1
+        else:
+            raise ValueError("Unknown unit selected") #Gibt es sowieso nicht, aber If funtkion muss so enden
+        
+
+        converted_p30 = [v * conversion_factor for v in float_values]
+        output_str = ", ".join(f"{v:.6f}" for v in converted_p30)
+
+        entry_var_p30.delete(0, tk.END)
+        entry_var_p30.insert(0, output_str)
+
+        return converted_p30
+
+    except Exception as e:         
+        entry_var_p30.delete(0, tk.END)
+        entry_var_p30.insert(0, f"Error: {e}")
+        return None
 
 ##################################
 # VAR. ASSIGNMENT - BOTTOM RIGHT
@@ -378,36 +449,27 @@ frame_Fixed_Values.grid(row=0, column=0)
 label_Fixed_values = tk.Label(frame_Fixed_Values, text="Fixed Variables")
 label_Fixed_values.grid(row=0, column=0)
 
-# Label and entry for p30 1H
-label_p30_1H = tk.Label(frame_Fixed_Values, text=r"p30 1H [μS]")  # tkinter does not present LaTeX style greek letters
-label_p30_1H.grid(row=1, column=0)
-entry_p30_1H = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT
-entry_p30_1H.grid(row=1, column=1)
+#Label for fixed gpz6 - fixed gradient strength for gradient length variation experiments
+label_gpz6 = tk.Label(frame_Fixed_Values, text="gpz6 [%]")
+label_gpz6.grid(row=1,column=0)
+#Input field for gpz6 - tk.Entry = allows everything to be entered => I need to convert the string to float, 
+# In this case: String - to float ( precent number )
+entry_gpz6 = tk.Entry(frame_Fixed_Values,width=5 )                  # CONVERT STRING TO FLOAT
+entry_gpz6.grid(row=2, column=1)
 
-# Label and entry for p30 19F (new, directly below 1H)
-label_p30_19F = tk.Label(frame_Fixed_Values, text=r"p30 19F [μS]")
-label_p30_19F.grid(row=2, column=0)
-entry_p30_19F = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT
-entry_p30_19F.grid(row=2, column=1)
+#Label for p30 - fixed gradient length for gpz6 variation experiments
+label_p30 = tk.Label(frame_Fixed_Values, text=r"p30 [μS]") #tkinter - does not present LaTeX style greek letters
+label_p30.grid(row=2, column=0)
+#Input field for fixed p30
+entry_p30 = tk.Entry(frame_Fixed_Values, width=5)                   #CONVERT STRING INTO FLOAT
+entry_p30.grid(row=1, column=1)
 
-# Label and entry for gpz6 1H
-label_gpz6_1H = tk.Label(frame_Fixed_Values, text="gpz6 1H [%]")
-label_gpz6_1H.grid(row=3, column=0)
-entry_gpz6_1H = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING TO FLOAT
-entry_gpz6_1H.grid(row=3, column=1)
-
-# Label and entry for gpz6 19F (new, directly below 1H)
-label_gpz6_19F = tk.Label(frame_Fixed_Values, text="gpz6 19F [%]")
-label_gpz6_19F.grid(row=4, column=0)
-entry_gpz6_19F = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING TO FLOAT
-entry_gpz6_19F.grid(row=4, column=1)
-
-# Label and entry for initial guess (keep the same)
+#Label for initial guess regarding fit
 label_initial_guess = tk.Label(frame_Fixed_Values, text="in. guess")
-label_initial_guess.grid(row=5, column=0)
-entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT - ALLOW 10^x == 10**9
-entry_initial_guess.grid(row=5, column=1)
-                           #Two ways of entering an exponent
+label_initial_guess.grid(row=3, column=0)
+#entry for initual guess   
+entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)         #CONVERT STRING INTO FLOAT - ALLOW 10^x == 10**9
+entry_initial_guess.grid(row=3,column=1)                            #Two ways of entering an exponent
                                                                     #implement info which shows how to enter what exactly
 
 
@@ -422,26 +484,33 @@ ttk.Separator(frame_input,orient="vertical").grid(column=1,row=0,rowspan=4, stic
 frame_Variable_Values = tk.Frame(frame_input, padx=10, pady=10)
 frame_Variable_Values.grid(row=0, column=2)
 
+
+#p30 Variable _ based on Radiobuttons which only allows one selection of these three
+
+p30_selection = tk.StringVar(value="μs")
+
 #Variable p30 Entry 
 label_p30_var = tk.Label(frame_Variable_Values, text="Var. p30 increments: ")
 label_p30_var.grid(row=0, column=0)
 
-p30_microSeconds = tk.Checkbutton(frame_Variable_Values, text="μS")
+p30_microSeconds = tk.Radiobutton(frame_Variable_Values, text="μS", variable=p30_selection, value="μs")
 p30_microSeconds.grid(row=0, column=1)
 
-p30_milliSeconds= tk.Checkbutton(frame_Variable_Values, text="mS")
+p30_milliSeconds= tk.Radiobutton(frame_Variable_Values, text="ms", variable=p30_selection, value="ms")
 p30_milliSeconds.grid(row=0,column=2)
 
-p30_Seconds = tk.Checkbutton(frame_Variable_Values, text="S")
+p30_Seconds = tk.Radiobutton(frame_Variable_Values, text="S", variable=p30_selection, value="s")
 p30_Seconds.grid(row=0,column=3)
 
-Button_Converter = tk.Button(frame_Variable_Values, text="convert into S")         #CONVERT COMMAND MISSING
+Button_Converter = tk.Button(frame_Variable_Values, text="convert into S", command= p30_converter)        
 Button_Converter.grid(row=1, column=4)
 
 
 #Entry Field - paste values into here
 entry_var_p30 = tk.Entry(frame_Variable_Values, width=40)
 entry_var_p30.grid(row=1, column=0, columnspan=4)
+
+
 
 #label for gpz6 var
 Label_gpz6_var = tk.Label(frame_Variable_Values, text="Var. gpz6 increments:")
@@ -450,7 +519,7 @@ Label_gpz6_var.grid(row=2, column=0)
 entry_gpz6_var = tk.Entry(frame_Variable_Values, width=40)
 entry_gpz6_var.grid(row=3, column=0, columnspan=4)
 
-Label_entry_gpz6 =tk.Label(frame_Variable_Values, text="[T/m]")  
+Label_entry_gpz6 =tk.Label(frame_Variable_Values, text="[T/m]")
 Label_entry_gpz6.grid(row=3, column=4)
 
 ttk.Separator(frame_input,orient="vertical").grid(column=3,row=0,rowspan=4, sticky="ns") 
@@ -486,10 +555,8 @@ Label_Increments.grid(row=3, column=0)
 entry_Increments = tk.Entry(frame_NMR_settings, width=10)
 entry_Increments.grid(row=3, column=1)
 
-Button_Ignore = tk.Button(frame_NMR_settings, text="Ignore")
-Button_Ignore.grid(row=4, column=0)
 
-Button_Compute_Increments = tk.Button(frame_NMR_settings, text="Compute")
+Button_Compute_Increments = tk.Button(frame_NMR_settings, text="Compute",command=compute_gpz6_increments)
 Button_Compute_Increments.grid(row=4, column=1)
 
 
