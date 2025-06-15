@@ -198,28 +198,25 @@ def import_file_integral_info(input_file):
 # Global variables
 row_counter = 1  # Start counting from row 1 (since row 0 is used by the static UI)
 dynamic_rows = []  # List to store all widget groups for later deletion or reference
+
 def add_File():
     global row_counter  # Make sure we use the global row counter
 
-    # Create separate StringVars for this row's radiobutton groups
-    var_gradient = tk.StringVar(value="gpz6")  # default selection in gradient group
-    var_isotope = tk.StringVar(value="1H")     # default selection in isotope group
-
-    # --- Radiobuttons for experiment flags ---
-    button_gpz6 = tk.Radiobutton(frame_data_import, text="gpz6", variable=var_gradient, value="gpz6")
+    # --- Checkbuttons for experiment flags ---
+    button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")
     button_gpz6.grid(row=row_counter, column=0, padx=5)  # Place in column 0 of current row
 
-    button_p30 = tk.Radiobutton(frame_data_import, text="p30", variable=var_gradient, value="p30")
+    button_p30 = tk.Checkbutton(frame_buttons, text="p30")
     button_p30.grid(row=row_counter, column=1, padx=5)  # Column 1
 
-    button_1H = tk.Radiobutton(frame_data_import, text="1H", variable=var_isotope, value="1H")
+    button_1H = tk.Checkbutton(frame_buttons, text="1H")
     button_1H.grid(row=row_counter, column=2, padx=5)  # Column 2
 
-    button_19F = tk.Radiobutton(frame_data_import, text="19F", variable=var_isotope, value="19F")
+    button_19F = tk.Checkbutton(frame_buttons, text="19F")
     button_19F.grid(row=row_counter, column=3, padx=5)  # Column 3
 
     # --- Entry widget to display the file path ---
-    entry_path_new = tk.Entry(frame_data_import, width=40)
+    entry_path_new = tk.Entry(frame_buttons, width=40)
     entry_path_new.grid(row=row_counter, column=4, padx=10)  # Column 4
 
     # --- Browse button for selecting file ---
@@ -231,10 +228,11 @@ def add_File():
             entry_path_new.delete(0, tk.END)  # Clear current entry
             entry_path_new.insert(0, filepath)  # Insert new path
 
-    button_browse = tk.Button(frame_data_import, text="Browse", command=browse_file_new)
+    button_browse = tk.Button(frame_buttons, text="Browse", command=browse_file_new)
     button_browse.grid(row=row_counter, column=5, padx=5)  # Column 5
 
     # --- Import button that processes the selected file ---
+       # --- Updated Import button (with live output) ---
     def Import_databutton_new():
         filepath = entry_path_new.get()
         if filepath:
@@ -254,7 +252,7 @@ def add_File():
                 text_output_integral_info.delete("1.0", tk.END)
                 text_output_integral_info.insert(tk.END, f"Fehler:\n{e}")
 
-    button_import = tk.Button(frame_data_import, text="Import Info", command=Import_databutton_new)
+    button_import = tk.Button(frame_buttons, text="Import Info", command=Import_databutton_new)
     button_import.grid(row=row_counter, column=6, padx=5)
 
     # --- Delete button to remove this row of widgets ---
@@ -265,18 +263,16 @@ def add_File():
             widget.grid_forget()  # Hides the widget from the grid
         dynamic_rows.remove(widgets)  # Remove from tracking list
 
-    button_delete = tk.Button(frame_data_import, text=" - Remove", command=delete_row)
+    button_delete = tk.Button(frame_buttons, text=" - Remove", command=delete_row)
     button_delete.grid(row=row_counter, column=7, padx=5)  # Column 7
 
     # --- Save the entire row for potential later reference or cleanup ---
     dynamic_rows.append([
         button_gpz6, button_p30, button_1H, button_19F,
-        entry_path_new, button_browse, button_import, button_delete,
-        var_gradient, var_isotope  # Save the StringVars too if needed
+        entry_path_new, button_browse, button_import, button_delete
     ])
 
     row_counter += 1  # Prepare for the next row to be added below
-
 
 
 
@@ -324,45 +320,32 @@ root.geometry("9000x700")
 
 
 # ----------- frame_buttons (alle Bedienelemente) -----------
-frame_data_import = tk.LabelFrame(root)
-frame_data_import.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
-
-####### Radiobuttons for either gpz6 or p30 selection
-
-#Gradient Selection
-##################################
-#   QUICK INFO REG. Gradient Selection
-#  selecting gpz6  implement variable values of gpz6 & fixed p30
-# selecting p30 implements variable values of p30 & fixed gpz6 
-# Variable values are located in Frame_Valuable 
-
-Variable_gradient = tk.StringVar(value="gpz6")
+frame_buttons = tk.LabelFrame(root)
+frame_buttons.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
 
 # Checkbuttons & Buttons nebeneinander platzieren
-button_gpz6 = tk.Radiobutton(frame_data_import, text="gpz6", variable=Variable_gradient, value="gpz6")
+button_gpz6 = tk.Checkbutton(frame_buttons, text="gpz6")
 button_gpz6.grid(row=0, column=0, padx=5)
 
-button_p30 = tk.Radiobutton(frame_data_import, text="p30", variable=Variable_gradient, value="p30")
+button_p30 = tk.Checkbutton(frame_buttons, text="p30")
 button_p30.grid(row=0, column=1, padx=5)
 
-Isotope_selection = tk.StringVar(value="1H")
-
-button_1H = tk.Radiobutton(frame_data_import, text="1H", variable=Isotope_selection, value="1H")
+button_1H = tk.Checkbutton(frame_buttons, text="1H")
 button_1H.grid(row=0, column=2, padx=5)
 
-button_19F = tk.Radiobutton(frame_data_import, text="19F", variable=Isotope_selection, value="19F")
+button_19F = tk.Checkbutton(frame_buttons, text="19F")
 button_19F.grid(row=0, column=3, padx=5)
 
-entry_path = tk.Entry(frame_data_import, width=40)
+entry_path = tk.Entry(frame_buttons, width=40)
 entry_path.grid(row=0, column=4, padx=10)
 
-button_browse = tk.Button(frame_data_import, text="Browse", command=browse_file)
+button_browse = tk.Button(frame_buttons, text="Browse", command=browse_file)
 button_browse.grid(row=0, column=5, padx=5)
 
-button_import = tk.Button(frame_data_import, text="Import Info", command=Import_databutton)
+button_import = tk.Button(frame_buttons, text="Import Info", command=Import_databutton)
 button_import.grid(row=0, column=6, padx=5)
 
-button_addFile = tk.Button(frame_data_import, text=" + Add File", command=add_File)
+button_addFile = tk.Button(frame_buttons, text=" + Add File", command=add_File)
 button_addFile.grid(row=0, column=7, padx=5)
 
 # --- FIXED COLUMN for right-hand output section (column 8) ---
