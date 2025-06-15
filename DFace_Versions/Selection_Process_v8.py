@@ -451,28 +451,36 @@ frame_Fixed_Values.grid(row=0, column=0)
 label_Fixed_values = tk.Label(frame_Fixed_Values, text="Fixed Variables")
 label_Fixed_values.grid(row=0, column=0)
 
-#Label for fixed gpz6 - fixed gradient strength for gradient length variation experiments
-label_gpz6 = tk.Label(frame_Fixed_Values, text="gpz6 [%]")
-label_gpz6.grid(row=1,column=0)
-#Input field for gpz6 - tk.Entry = allows everything to be entered => I need to convert the string to float, 
-# In this case: String - to float ( precent number )
-entry_gpz6 = tk.Entry(frame_Fixed_Values,width=5 )                  # CONVERT STRING TO FLOAT
-entry_gpz6.grid(row=2, column=1)
+# Label and entry for p30 1H
+label_p30_1H = tk.Label(frame_Fixed_Values, text=r"p30 1H [μS]")  # tkinter does not present LaTeX style greek letters
+label_p30_1H.grid(row=1, column=0)
+entry_p30_1H = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT
+entry_p30_1H.grid(row=1, column=1)
 
-#Label for p30 - fixed gradient length for gpz6 variation experiments
-label_p30 = tk.Label(frame_Fixed_Values, text=r"p30 [μS]") #tkinter - does not present LaTeX style greek letters
-label_p30.grid(row=2, column=0)
-#Input field for fixed p30
-entry_p30 = tk.Entry(frame_Fixed_Values, width=5)                   #CONVERT STRING INTO FLOAT
-entry_p30.grid(row=1, column=1)
+# Label and entry for p30 19F (new, directly below 1H)
+label_p30_19F = tk.Label(frame_Fixed_Values, text=r"p30 19F [μS]")
+label_p30_19F.grid(row=2, column=0)
+entry_p30_19F = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT
+entry_p30_19F.grid(row=2, column=1)
 
-#Label for initial guess regarding fit
+# Label and entry for gpz6 1H
+label_gpz6_1H = tk.Label(frame_Fixed_Values, text="gpz6 1H [%]")
+label_gpz6_1H.grid(row=3, column=0)
+entry_gpz6_1H = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING TO FLOAT
+entry_gpz6_1H.grid(row=3, column=1)
+
+# Label and entry for gpz6 19F (new, directly below 1H)
+label_gpz6_19F = tk.Label(frame_Fixed_Values, text="gpz6 19F [%]")
+label_gpz6_19F.grid(row=4, column=0)
+entry_gpz6_19F = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING TO FLOAT
+entry_gpz6_19F.grid(row=4, column=1)
+
+# Label and entry for initial guess (keep the same)
 label_initial_guess = tk.Label(frame_Fixed_Values, text="in. guess")
-label_initial_guess.grid(row=3, column=0)
-#entry for initual guess   
-entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)         #CONVERT STRING INTO FLOAT - ALLOW 10^x == 10**9
-entry_initial_guess.grid(row=3,column=1)                            #Two ways of entering an exponent
-                                                                    #implement info which shows how to enter what exactly
+label_initial_guess.grid(row=5, column=0)
+entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT - ALLOW 10^x == 10**9
+entry_initial_guess.grid(row=5, column=1)
+                        #implement info which shows how to enter what exactly
 
 
 
