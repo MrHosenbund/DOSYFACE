@@ -359,7 +359,6 @@ button_1H = tk.Radiobutton(frame_data_import, text="1H", variable=Isotope_select
 button_1H.grid(row=0, column=2, padx=5)
 
 button_19F = tk.Radiobutton(frame_data_import, text="19F", variable=Isotope_selection, value="19F")
-
 button_19F.grid(row=0, column=3, padx=5)
 
 entry_path = tk.Entry(frame_data_import, width=40)

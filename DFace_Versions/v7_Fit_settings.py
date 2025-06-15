@@ -425,8 +425,10 @@ def open_ChsANorm_Window():
     Normalized_Integral.grid(row=0, column=2, rowspan=1)
 
 
-
-
+frame_button_choose =tk.Frame(frame_Info)
+frame_button_choose.grid(row=2,column=0, sticky="w")
+button_choose = tk.Button(frame_button_choose, text="Open Choose & Normalize Window", command=open_ChsANorm_Window)
+button_choose.grid(row=0,column=0)
 
 
 
