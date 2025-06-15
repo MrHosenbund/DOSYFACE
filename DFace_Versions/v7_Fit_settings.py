@@ -37,7 +37,7 @@ def browse_file():
 ################################################
 #   ASSIGNING MULTIPLE FUNCTIONS TO ONE BUTTON
 ################################################
-def Import_databutton():
+def Import_Info_Button():
     filepath = entry_path.get()
     extract_integral_info(filepath)
     import_file_dataframe(filepath)
@@ -254,7 +254,7 @@ def add_File():
                 text_output_integral_info.delete("1.0", tk.END)
                 text_output_integral_info.insert(tk.END, f"Fehler:\n{e}")
 
-    button_import = tk.Button(frame_data_import, text="Import Info", command=Import_databutton_new)
+    button_import = tk.Button(frame_data_import, text="Import info", command=Import_databutton_new)
     button_import.grid(row=row_counter, column=6, padx=5)
 
     # --- Delete button to remove this row of widgets ---
@@ -327,6 +327,11 @@ root.geometry("9000x700")
 frame_data_import = tk.LabelFrame(root)
 frame_data_import.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
 
+
+
+
+
+
 ####### Radiobuttons for either gpz6 or p30 selection
 
 #Gradient Selection
@@ -335,6 +340,9 @@ frame_data_import.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
 #  selecting gpz6  implement variable values of gpz6 & fixed p30
 # selecting p30 implements variable values of p30 & fixed gpz6 
 # Variable values are located in Frame_Valuable 
+
+
+
 
 Variable_gradient = tk.StringVar(value="gpz6")
 
@@ -351,6 +359,7 @@ button_1H = tk.Radiobutton(frame_data_import, text="1H", variable=Isotope_select
 button_1H.grid(row=0, column=2, padx=5)
 
 button_19F = tk.Radiobutton(frame_data_import, text="19F", variable=Isotope_selection, value="19F")
+
 button_19F.grid(row=0, column=3, padx=5)
 
 entry_path = tk.Entry(frame_data_import, width=40)
@@ -359,7 +368,7 @@ entry_path.grid(row=0, column=4, padx=10)
 button_browse = tk.Button(frame_data_import, text="Browse", command=browse_file)
 button_browse.grid(row=0, column=5, padx=5)
 
-button_import = tk.Button(frame_data_import, text="Import Info", command=Import_databutton)
+button_import = tk.Button(frame_data_import, text="Import Info", command=Import_Info_Button)
 button_import.grid(row=0, column=6, padx=5)
 
 button_addFile = tk.Button(frame_data_import, text=" + Add File", command=add_File)
@@ -368,7 +377,7 @@ button_addFile.grid(row=0, column=7, padx=5)
 # --- FIXED COLUMN for right-hand output section (column 8) ---
 
 frame_Info=tk.LabelFrame(root,text="Integral Information & Dataframe",pady=10,padx=10 )
-frame_Info.grid(row=0, column=1, rowspan=3,sticky="n")
+frame_Info.grid(row=0, column=1, rowspan=2,sticky="n")
 
 
 text_output_integral_info = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
@@ -378,10 +387,117 @@ text_output_integral_info.grid(row=0, column=0)
 text_output_dataframe = scrolledtext.ScrolledText(frame_Info, wrap=tk.WORD, width=85, height=10)
 text_output_dataframe.grid(row=1, column=0)
 
+
+
+
+
+
+######################################
+#   OPEN CHOOSE AND NORMALIZE WINDOW
+######################################
+
+
+def open_ChsANorm_Window():
+    ChooseANorm_window = tk.Toplevel(root)
+    ChooseANorm_window.title("Choose and Normalize Region")
+    ChooseANorm_window.geometry("350x300")
+    label = tk.Label(ChooseANorm_window, text="Choose a Region and normalize it. Follow the chronology displayed in the integral Info Window")
+    
+    frame_buttons = tk.Frame(ChooseANorm_window)
+    frame_buttons.grid(row=0, column=0, rowspan=2)
+
+    Label_Region_entry = tk.Label(frame_buttons, text="Region: ")
+    Label_Region_entry.grid(row=0,column=0, sticky="n")
+
+    Region_entry = tk.Entry(frame_buttons, width=10)
+    Region_entry.grid(row=0, column=1, sticky="n")
+
+    button_normalize = tk.Button(frame_buttons, text="Normalize") # Normalize button command missing
+    button_normalize.grid(row=1, column=0, sticky="w")
+
+    button_save = tk.Button(frame_buttons, text="Save")
+    button_save.grid(row=2, column=0, sticky="s")
+
+
+    Frame_norm_integral = tk.Frame(ChooseANorm_window)
+    Frame_norm_integral.grid(row=0, column=2, rowspan=1)
+    Normalized_Integral = scrolledtext.ScrolledText(ChooseANorm_window, wrap=tk.WORD, width=20, height=20)
+    Normalized_Integral.grid(row=0, column=2, rowspan=1)
+
+
+
+
+
+
+
+
+
+
+######################################
+#   FITTING SETTINGS FRAME
+######################################
+
+frame_fitting_settings = tk.LabelFrame(root,text="Fit-Settings", padx=10, pady=10 )
+frame_fitting_settings.grid(row=2, column=1, sticky="n")
+
+Label_filename = tk.Label(frame_fitting_settings, text="Filename: ")
+Label_filename.grid(row=0, column=0)
+
+Entry_filename = tk.Entry(frame_fitting_settings, width=30)
+Entry_filename.grid(row=0, column=2)
+
+Label_Legendlabel = tk.Label(frame_fitting_settings, text="Label: ")
+Label_Legendlabel.grid(row=0, column=3)
+
+Entry_Label = tk.Entry(frame_fitting_settings, width=10)
+Entry_Label.grid(row=0, column=4)
+
+Label_Color = tk.Label(frame_fitting_settings, text="Color: ")
+Label_Color.grid(row=0, column=5)
+
+Color = tk.StringVar(frame_fitting_settings)
+Color.set("black") # default color is set to black
+
+color_selection = tk.OptionMenu(frame_fitting_settings, Color, "black", "red")
+color_selection.grid(row=0, column=6)
+
+Label_Symbol = tk.Label(frame_fitting_settings, text="Symbol: ")
+Label_Symbol.grid(row=0, column=7)
+
+Symbol = tk.StringVar(frame_fitting_settings)
+Symbol.set("ᨔ")
+
+Symbol_selection = tk.OptionMenu(frame_fitting_settings, Symbol, "ᨔ", "ᨖ", "为")
+Symbol_selection.grid(row=0, column=8)
+
+
+
+#################
+# GEN FIT BUTTON   # Initiate Calculations and plots everything
+#################
+
+Frame_Generate_Fit_Button = tk.Frame(frame_fitting_settings)
+Frame_Generate_Fit_Button.grid(row=1, column=0)
+
+Button_gen_fit = tk.Button(Frame_Generate_Fit_Button,text="Generate Fit")  # Initiate Calculations and plot everything
+Button_gen_fit.grid(row=0,column=0)         #COMMAND MISSINg
+
+
+
+#################################################################################
+#    DATAFRAME KLASSIFIZIERUNG
+#
+#   Bestimmt, ob Dataframe als var_p30 oder var_gpz6 weiter verarbeitet wird
+#   Das ist abhängig von den dazu ausgesuchten Radiobuttons
+#
+#################################################################################
+
+
+
+
 ####################################
 #   VARIABLE FUNCTIONALITIES
 ####################################
-
 
 ###############################
 #   GPZ6 Increment Calculator
@@ -454,10 +570,13 @@ def  p30_converter():
 ##################################
 # VAR. ASSIGNMENT - BOTTOM RIGHT
 ##################################
+######################################
+# VARIBALE FRAME
+######################################
 
 #variable Assignment - Frame
 frame_input = tk.LabelFrame(root, text="Variables", padx=10, pady=10)
-frame_input.grid(row=2, column=1)
+frame_input.grid(row=3, column=1)
 
 #Fixed Values - Frame 
 frame_Fixed_Values = tk.Frame(frame_input,padx=10, pady=10)
@@ -494,6 +613,15 @@ entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING IN
 entry_initial_guess.grid(row=5, column=1)
                       #Two ways of entering an exponent                          #Two ways of entering an exponent
                                                                     #implement info which shows how to enter what exactly
+
+
+
+
+
+
+
+
+
 
 
 
@@ -582,6 +710,17 @@ entry_Increments.grid(row=3, column=1)
 Button_Compute_Increments = tk.Button(frame_NMR_settings, text="Compute",command=compute_gpz6_increments)
 Button_Compute_Increments.grid(row=4, column=1)
 
+
+
+
+
+
+
+
+
+#######################################
+#       GRAPH & RESULTS
+######################################
 
 
 #Graph Frame for Graph
