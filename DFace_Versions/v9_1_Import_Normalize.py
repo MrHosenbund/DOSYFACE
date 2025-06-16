@@ -89,42 +89,6 @@ def import_dataframe(input_file): #imports data to dataframe, filters out all li
     return dataframe
 
 
-
-
-######################################
-#   IMPORT DATAFRAME INTO TEXT FIELD
-# ######################################
-# # Function to import a dataframe from a given file and display it in the GUI text field
-# def import_file_dataframe_text(input_file):
-#     # Get the filepath from the entry field (GUI input field)
-#     filepath = entry_path.get()
-
-#     # Check if a filepath was actually provided
-#     if filepath:
-#         try:
-#             # Call function to load and return the cleaned dataframe from the file
-#             dataframe = import_dataframe(filepath)
-
-#             # Clear any previous content in the dataframe output text field
-#             text_output_dataframe.delete("1.0", tk.END)
-
-#             # Insert the entire dataframe (as string) into the text widget (just once)
-#             text_output_dataframe.insert(tk.END, dataframe.to_string())
-
-#         # Handle exceptions if an error occurs during file loading or parsing
-#         except Exception as e:
-#             # Clear any old content in the text field
-#             text_output_dataframe.delete("1.0", tk.END)
-
-#             # Display the error message in the text field
-#             text_output_dataframe.insert(tk.END, f"Fehler beim dataframe Import:\n{e}")
-
-#     else:
-#         # If no filepath was entered, inform the user
-#         text_output_dataframe.delete("1.0", tk.END)
-#         text_output_dataframe.insert(tk.END, "Kein Pfad angegeben.")
-
-
 ###########################################
 #
 #       INTEGRAL INFO IMPORT
@@ -475,6 +439,8 @@ frame_Gradient_Label =tk.Frame(frame_Info)
 frame_Gradient_Label.grid(row=2, column=0)
 Gradient_label = tk.Label(frame_Gradient_Label, text="Select a variable Gradient and Isotope")
 Gradient_label.grid(row=0,column=0)
+
+
 
 
 
