@@ -48,6 +48,7 @@ def Import_Info_Button():
 
 def import_file_dataframe_text(input_file):
     global df  # Declare that we want to modify the global variable
+    #Global will allow me to access this data from anywhere in the script. It is sort of hovering around everything
 
     filepath = entry_path.get()
     if filepath:
