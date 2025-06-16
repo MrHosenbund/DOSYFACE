@@ -10,6 +10,25 @@ from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
+###############################################################################
+#
+#           V_10_1
+#           At this point i decided to finish this program with the key
+#           functionalities being evaluating just one dataset
+#           Not multiple datasets. -> time constraints and Prüfungsphase
+#           are slowly creeping up and do not allow crazy modifications which I
+#           simply do not have the time to work on. 
+#
+###############################################################################
+#
+#       v10_1
+#       the SAVE - button in the choose region & normalize window
+#       Should add information into the row which describes your datapoints
+#       for the fit. 
+#       The Save button sould also now save the dataframe in the ndf window
+#
+###############################################################################
+
 
 
 #Button definition, Browsing function
@@ -27,6 +46,7 @@ def browse_file():
 
 
 
+
 ####################################
 #   COMBINE Functions 
 #   def extract_integral_info
@@ -41,10 +61,26 @@ def browse_file():
 def Import_Info_Button():
     filepath = entry_path.get()
     extract_integral_info(filepath)
-    import_file_dataframe(filepath)
+    import_file_dataframe_text(filepath)
     import_file_integral_info(filepath)
     update_gradient_label_on_import()
     
+
+def import_file_dataframe_text(input_file):
+    global df  # Declare that we want to modify the global variable
+    #Global will allow me to access this data from anywhere in the script. It is sort of hovering around everything
+
+    filepath = entry_path.get()
+    if filepath:
+        try:
+            df = import_dataframe(filepath)  # <-- Assign globally
+            text_output_dataframe.delete("1.0", tk.END)
+            text_output_dataframe.insert(tk.END, df.to_string())
+        except Exception as e:
+            text_output_dataframe.delete("1.0", tk.END)
+            text_output_dataframe.insert(tk.END, f"Fehler beim dataframe Import:\n{e}")
+
+
 
 ###################################################
 #   EXTRACT DATAFRAME FROM TEXTFIELD
@@ -71,42 +107,6 @@ def import_dataframe(input_file): #imports data to dataframe, filters out all li
     #dataframe = dataframe.replace("", np.nan).dropna(how='all') #removes completely empty rows
 
     return dataframe
-
-
-
-
-######################################
-#   IMPORT DATAFRAME INTO TEXT FIELD
-######################################
-# Function to import a dataframe from a given file and display it in the GUI text field
-def import_file_dataframe(input_file):
-    # Get the filepath from the entry field (GUI input field)
-    filepath = entry_path.get()
-
-    # Check if a filepath was actually provided
-    if filepath:
-        try:
-            # Call function to load and return the cleaned dataframe from the file
-            dataframe = import_dataframe(filepath)
-
-            # Clear any previous content in the dataframe output text field
-            text_output_dataframe.delete("1.0", tk.END)
-
-            # Insert the entire dataframe (as string) into the text widget (just once)
-            text_output_dataframe.insert(tk.END, dataframe.to_string())
-
-        # Handle exceptions if an error occurs during file loading or parsing
-        except Exception as e:
-            # Clear any old content in the text field
-            text_output_dataframe.delete("1.0", tk.END)
-
-            # Display the error message in the text field
-            text_output_dataframe.insert(tk.END, f"Fehler beim dataframe Import:\n{e}")
-
-    else:
-        # If no filepath was entered, inform the user
-        text_output_dataframe.delete("1.0", tk.END)
-        text_output_dataframe.insert(tk.END, "Kein Pfad angegeben.")
 
 
 ###########################################
@@ -195,6 +195,7 @@ row_counter = 1   # Also global row counter
 
 def add_File():
     global row_counter
+    global df
 
     var_gradient = tk.StringVar(value="gpz6")
     var_isotope = tk.StringVar(value="1H")
@@ -232,7 +233,7 @@ def add_File():
                 text_output_integral_info.delete("1.0", tk.END)
                 for line in info:
                     text_output_integral_info.insert(tk.END, line + "\n")
-
+                global df
                 df = import_dataframe(filepath)
                 text_output_dataframe.delete("1.0", tk.END)
                 text_output_dataframe.insert(tk.END, df.to_string())
@@ -396,12 +397,61 @@ text_output_dataframe.grid(row=1, column=0)
 # enter region number
 # receive normalized column
 # continue fitting calculations with this one
-#     
+# press save and confirm info and dataframe  
+#  
+
+# Initialize an empty dictionary to hold buffers indexed by a key (e.g., dataset index)
+normalized_data_buffers = {}
+
+#Once I open the n_df window the normalized integral should appear within the window
+
+
+
+
+#n_df = normalized dataframe
+# Global variables to hold window, widget, and buffer
+ndf_window = None
+ndf_result = None
+normalized_data_buffers = {}  # Your buffer dict (make sure it matches your save function)
+
+def n_df():
+    global ndf_window, ndf_result, normalized_data_buffers
+
+    # If window already exists, just bring it to front
+    if ndf_window and ndf_window.winfo_exists():
+        ndf_window.lift()
+        return
+
+    ndf_window = tk.Toplevel(root)
+    ndf_window.title("Normalized Dataframe")
+    ndf_window.geometry("600x400")
+
+    ndf_result = scrolledtext.ScrolledText(ndf_window, wrap=tk.WORD, width=60, height=30)
+    ndf_result.grid(row=0, column=0, padx=10, pady=10)
+
+    # Combine all buffered normalized data into one string
+    full_text = "\n".join(normalized_data_buffers.values())
+
+    # Insert buffer content into the text widget
+    ndf_result.insert(tk.END, full_text)
+#SAVE Button in Choose_window    
+# Place this once at the top level of your script (not inside the function)
+ # key: datapoint_name, value: accumulated normalized text
 
 def open_ChsANorm_Window():
+    global normalized_data_buffers
+
     ChooseANorm_window = tk.Toplevel(root)
     ChooseANorm_window.title("Choose and Normalize Region")
     ChooseANorm_window.geometry("500x300")
+
+    saved = False  # local flag
+
+    def on_close():
+        # just destroy window, flag reset next time you open
+        ChooseANorm_window.destroy()
+
+    ChooseANorm_window.protocol("WM_DELETE_WINDOW", on_close)
 
     frame_buttons = tk.Frame(ChooseANorm_window)
     frame_buttons.grid(row=0, column=0, sticky="nw", padx=5, pady=5)
@@ -412,36 +462,69 @@ def open_ChsANorm_Window():
     Region_entry = tk.Entry(frame_buttons, width=10)
     Region_entry.grid(row=0, column=1, sticky="n")
 
-    button_normalize = tk.Button(frame_buttons, text="Normalize")  # Command not added - This version, not
-    button_normalize.grid(row=1, column=0, sticky="w", pady=10)
-
-    button_save = tk.Button(frame_buttons, text="Save")
-    button_save.grid(row=2, column=0, sticky="s", pady=10)
-
     Normalized_Integral = scrolledtext.ScrolledText(ChooseANorm_window, wrap=tk.WORD, width=40, height=20)
     Normalized_Integral.grid(row=0, column=1, sticky="nsew", padx=10, pady=5)
 
-    # Add normalize function inside or outside
-    def normalize_region(dataframe, region_entry):
+    def normalize():
+        global df
         try:
-            region_num = int(region_entry.get())
-            region_idx = region_num - 1  # Convert 1-based to 0-based index
-
-            if region_idx < 0 or region_idx >= dataframe.shape[1]:
-                Normalized_Integral.delete("1.0", tk.END)
-                Normalized_Integral.insert(tk.END, f"Region {region_num} out of bounds.\n")
-                return
-
-            column_data = dataframe.iloc[:, region_idx]
-            norm_var_df = column_data / column_data.max()
-
+            region_index = int(Region_entry.get()) - 1
+            normalized = df.iloc[:, region_index] / df.iloc[:, region_index].max()
             Normalized_Integral.delete("1.0", tk.END)
-            for i, val in enumerate(norm_var_df):
-                Normalized_Integral.insert(tk.END, f"Index {i}: {val:.6f}\n")
-
-        except ValueError:
+            Normalized_Integral.insert(tk.END, normalized.to_string())
+        except Exception as e:
             Normalized_Integral.delete("1.0", tk.END)
-            Normalized_Integral.insert(tk.END, "Please enter a valid integer for the region.\n")
+            Normalized_Integral.insert(tk.END, f"Fehler bei der Normalisierung:\n{e}")
+
+    button_normalize = tk.Button(frame_buttons, text="Normalize", command=normalize)
+    button_normalize.grid(row=1, column=0, sticky="w", pady=10)
+
+    def save():
+        global datapoint_row_count
+        global normalized_data_buffers
+        try:
+            gradient = Variable_gradient.get()
+            isotope = Isotope_selection.get()
+            region_n = Region_entry.get()
+
+            datapoint_name = f"{gradient}_{isotope}_Region_{region_n}"
+
+            if dataset_count.get() == "one":
+                # Update only fixed 0. Datapoints entry
+                Entry_filename.delete(0, tk.END)
+                Entry_filename.insert(0, datapoint_name)
+            else:
+                # Add new dynamic datapoint row
+                add_datapoint_row(datapoint_name)
+
+            # Get normalized text
+            normalized_text = Normalized_Integral.get("1.0", tk.END).strip()
+            append_text = f"{normalized_text}"
+
+            # Append normalized text to dictionary buffer keyed by datapoint_name
+            if datapoint_name not in normalized_data_buffers:
+                normalized_data_buffers[datapoint_name] = ""
+            normalized_data_buffers[datapoint_name] += append_text
+
+            # Prepare full text from all buffers concatenated
+            full_text = "\n".join(normalized_data_buffers.values())
+
+            # Update the n_df window content if open
+            if ndf_result and ndf_result.winfo_exists():
+                ndf_result.delete("1.0", tk.END)
+                ndf_result.insert(tk.END, full_text)
+            else:
+                # Open n_df window and load full buffer content
+                n_df()
+                ndf_result.delete("1.0", tk.END)
+                ndf_result.insert(tk.END, full_text)
+
+        except Exception as e:
+            print(f"Error updating filename: {e}")
+
+    button_save = tk.Button(frame_buttons, text="Save", command=save)
+    button_save.grid(row=2, column=0, sticky="s", pady=10)
+
 
 #Frame for normalizing and saving settings
 frame_button_choose =tk.Frame(frame_Info)
@@ -457,57 +540,170 @@ Gradient_label = tk.Label(frame_Gradient_Label, text="Select a variable Gradient
 Gradient_label.grid(row=0,column=0)
 
 
+###############################
+#   ADD DATA IN FIT SETTINGS
+###############################
+
+
+
+# Global variables to track rows and frames
+dynamic_row_frames = []
+datapoint_row_count = 1  # assuming fixed row 0 exists
+
+def reindex_rows():
+    global dynamic_row_frames
+
+    for i, frame in enumerate(dynamic_row_frames, start=1):
+        for widget in frame.grid_slaves(row=0, column=3):
+            if isinstance(widget, tk.Label):
+                widget.config(text=f"{i}. Datapoints: ")
+                break
+
+def add_datapoint_row(filename_text=""):
+    global datapoint_row_count
+    global dynamic_row_frames
+
+    frame = tk.Frame(frame_Data_row)
+    frame.grid(row=datapoint_row_count, column=0, sticky="w")
+
+    def remove_row():
+        frame.destroy()
+        dynamic_row_frames.remove(frame)
+        reindex_rows()
+        global datapoint_row_count
+        datapoint_row_count = len(dynamic_row_frames) + 1
+
+    Button_checkmark_row = tk.Button(frame, text=u"\u2713")
+    Button_checkmark_row.grid(row=0, column=0)
+
+    Button_Cross_row = tk.Button(frame, text=u"\u2717")
+    Button_Cross_row.grid(row=0, column=1)
+
+    button_remove_row = tk.Button(frame, text=u"\u2013", command=remove_row)
+    button_remove_row.grid(row=0, column=2)
+
+    Label_Datapoint = tk.Label(frame, text=f"{datapoint_row_count}. Datapoints: ")
+    Label_Datapoint.grid(row=0, column=3, columnspan=2)
+
+    entry_filename = tk.Entry(frame, width=30)
+    entry_filename.grid(row=0, column=5)
+    entry_filename.insert(0, filename_text)
+
+    Label_Label = tk.Label(frame, text="Label: ")
+    Label_Label.grid(row=0, column=6)
+
+    entry_label = tk.Entry(frame, width=10)
+    entry_label.grid(row=0, column=7)
+
+    Label_Color = tk.Label(frame, text="Color: ")
+    Label_Color.grid(row=0, column=8)
+
+    color_var = tk.StringVar(frame)
+    color_var.set("black")
+    Dropdown_color = tk.OptionMenu(frame, color_var, "black", "red")
+    Dropdown_color.grid(row=0, column=9)
+
+    Label_Symbol = tk.Label(frame, text="Symbol: ")
+    Label_Symbol.grid(row=0, column=10)
+
+    symbol_var = tk.StringVar(frame)
+    symbol_var.set("ᨔ")
+    Dropdown_symbol = tk.OptionMenu(frame, symbol_var, "ᨔ", "ᨖ", "为")
+    Dropdown_symbol.grid(row=0, column=11)
+
+    Analyzed_dataframe = tk.Button(frame, text="df",command=n_df)
+    Analyzed_dataframe.grid(row=0, column=12)
+
+    # Add the frame reference for later removal or management
+    dynamic_row_frames.append(frame)
+
+    datapoint_row_count += 1  # increment for next row
+
 
 
 ######################################
 #   FITTING SETTINGS FRAME
 ######################################
+# Necessary to be on top so add_data function can acces that.
 
-frame_fitting_settings = tk.LabelFrame(root,text="Fit-Settings", padx=10, pady=10 )
-frame_fitting_settings.grid(row=2, column=1, sticky="n")
+frame_Fit_settings = tk.LabelFrame(root,text="Fit-Settings", padx=10, pady=10 )
+frame_Fit_settings.grid(row=2, column=1, sticky="n")
 
-Label_filename = tk.Label(frame_fitting_settings, text="Filename: ")
-Label_filename.grid(row=0, column=0)
+frame_Data_row = tk.Frame(frame_Fit_settings)
+frame_Data_row.grid(row=0, column=0, columnspan=9)
 
-Entry_filename = tk.Entry(frame_fitting_settings, width=30)
-Entry_filename.grid(row=0, column=2)
+############################################
+#   ORIGINAL BUTTONS IN FRAME _ DATA _ ROW
+############################################
 
-Label_Legendlabel = tk.Label(frame_fitting_settings, text="Label: ")
-Label_Legendlabel.grid(row=0, column=3)
+frame_0 = tk.Frame(frame_Data_row)
+frame_0.grid(row=0, column=0, sticky="w", pady=2)
 
-Entry_Label = tk.Entry(frame_fitting_settings, width=10)
-Entry_Label.grid(row=0, column=4)
+Button_checkmark = tk.Button(frame_0, text=u"\u2713")
+Button_checkmark.grid(row=0, column=0)
 
-Label_Color = tk.Label(frame_fitting_settings, text="Color: ")
-Label_Color.grid(row=0, column=5)
+Button_Cross = tk.Button(frame_0, text=u"\u2717")
+Button_Cross.grid(row=0, column=1)
 
-Color = tk.StringVar(frame_fitting_settings)
-Color.set("black") # default color is set to black
+# Spacer to replace missing minus button, same column=2
+Spacer = tk.Label(frame_0, text="    ").grid(row=0, column=2)  # Empty label for spacing - simply for cosmetic perfect alignment
 
-color_selection = tk.OptionMenu(frame_fitting_settings, Color, "black", "red")
-color_selection.grid(row=0, column=6)
+Label_filename = tk.Label(frame_0, text="0. Datapoints: ")
+Label_filename.grid(row=0, column=3, columnspan=2)
 
-Label_Symbol = tk.Label(frame_fitting_settings, text="Symbol: ")
-Label_Symbol.grid(row=0, column=7)
+Entry_filename = tk.Entry(frame_0, width=30)
+Entry_filename.grid(row=0, column=5)
 
-Symbol = tk.StringVar(frame_fitting_settings)
+Label_Legendlabel = tk.Label(frame_0, text="Label: ")
+Label_Legendlabel.grid(row=0, column=6)
+
+Entry_Label = tk.Entry(frame_0, width=10)
+Entry_Label.grid(row=0, column=7)
+
+Label_Color = tk.Label(frame_0, text="Color: ")
+Label_Color.grid(row=0, column=8)
+
+Color = tk.StringVar(frame_0)
+Color.set("black")
+
+color_selection = tk.OptionMenu(frame_0, Color, "black", "red")
+color_selection.grid(row=0, column=9)
+
+Label_Symbol = tk.Label(frame_0, text="Symbol: ")
+Label_Symbol.grid(row=0, column=10)
+
+Symbol = tk.StringVar(frame_0)
 Symbol.set("ᨔ")
 
-Symbol_selection = tk.OptionMenu(frame_fitting_settings, Symbol, "ᨔ", "ᨖ", "为")
-Symbol_selection.grid(row=0, column=8)
+Symbol_selection = tk.OptionMenu(frame_0, Symbol, "ᨔ", "ᨖ", "为")
+Symbol_selection.grid(row=0, column=11)
 
+#Analyzed_dataframe button should open a window which simply shows the normalized dataframe, 
+#which in turn will be used to create a fit using it. 
+
+
+
+Analyzed_dataframe = tk.Button(frame_0, text="df",command=n_df).grid(row=0, column=12)
 
 
 #################
 # GEN FIT BUTTON   # Initiate Calculations and plots everything
 #################
 
-Frame_Generate_Fit_Button = tk.Frame(frame_fitting_settings)
-Frame_Generate_Fit_Button.grid(row=1, column=0)
+# Frame for Generate Fit button (left)
+Frame_Generate_Fit_Button = tk.Frame(frame_Fit_settings)
+Frame_Generate_Fit_Button.grid(row=1, column=0, padx=5, pady=5)
+Button_gen_fit = tk.Button(Frame_Generate_Fit_Button, text="Generate Fit")  # Add command as needed
+Button_gen_fit.grid(row=0, column=0)
 
-Button_gen_fit = tk.Button(Frame_Generate_Fit_Button,text="Generate Fit")  # Initiate Calculations and plot everything
-Button_gen_fit.grid(row=0,column=0)         #COMMAND MISSINg
+# Frame for Add Data button (right)
+Frame_Add_Data_Button = tk.Frame(frame_Fit_settings)
+Frame_Add_Data_Button.grid(row=1, column=1, padx=5, pady=5)
 
+#Radiobutton which decides if you proceed evaluation with just one dataset or multiple
+dataset_count = tk.StringVar(value="one")
+Button_One = tk.Radiobutton(Frame_Add_Data_Button, text="One", variable=dataset_count, value="one").grid(row=0,column=0)
+button_multiple = tk.Radiobutton(Frame_Add_Data_Button, text="Multi", variable=dataset_count, value="Multiple").grid(row=0,column=1)
 
 
 #################################################################################
