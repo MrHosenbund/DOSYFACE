@@ -271,6 +271,57 @@ def add_File():
     row_counter += 1
 
 
+#########################################################################
+#
+#
+#
+#
+#               GENERATE FIT USING STEJSKAL TANNER EQUATION
+#
+#
+#
+#########################################################################
+
+
+############################################
+#
+#       NMR VARIABLE ASSIGNMENT
+#
+############################################
+
+gyro_mag_Ratio_1H = (2.675 * 10**8) #gyromagnetic ratio proton (s-1T-1)
+gyro_mag_Ratio_19F = (2.516 * 10**8) #gyromagnetic ratio proton (s-1T-1)
+
+
+#   RADIOBUTTON SELECTION DECIDES WHICH Stejskaltanner will be used
+
+
+
+#Stejskal Tanner Equation
+
+
+
+##################################################
+#           FIT VARIABLES
+##################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def plot_into_frame(target_frame):
@@ -292,14 +343,7 @@ def plot_into_frame(target_frame):
     canvas.draw()
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-############################################
-#
-#       NMR VARIABLE ASSIGNMENT
-#
-############################################
 
-gyro_mag_Ratio_1H = (2.675 * 10**8) #gyromagnetic ratio proton (s-1T-1)
-gyro_mag_Ratio_19F = (2.516 * 10**8) #gyromagnetic ratio proton (s-1T-1)
 
 
 
@@ -323,9 +367,10 @@ frame_data_import.grid(row=0, column=0, pady=5, padx=5, sticky="nw")
 
 
 
-
-
-####### Radiobuttons for either gpz6 or p30 selection
+####################################################
+#       RADIOBUTTONS
+####################################################
+# Radiobuttons for either gpz6 or p30 selection
 
 #Gradient Selection
 ##################################
@@ -340,8 +385,6 @@ def update_gradient_label_on_import():
     isotope = Isotope_selection.get()   # "1H" or "19F"
     new_text = f"Variable Gradient: {gradient}\nIsotope: {isotope}"
     Gradient_label.config(text=new_text)
-
-
 
 
 Variable_gradient = tk.StringVar(value="gpz6")
@@ -792,6 +835,80 @@ def  p30_converter():
 ##################################
 # VAR. ASSIGNMENT - BOTTOM RIGHT
 ##################################
+# Fixed Value Conversion
+
+# Gradient Dependent the p30 value will have to be doubled. 
+
+def converter_fixed():
+    p30_1H_val = None
+    p30_19F_val = None
+    gpz6_19F_val = None
+    gpz6_1H_val = None
+
+    try:
+        # Convert p30 1H
+        input_str = entry_p30_1H.get().strip()
+        val = float(input_str)
+        conversion_factor = 1e-6
+        converted_val = val * conversion_factor *2 # Gradient dependent Factor - times 2 Necessary 
+        output_str = f"{converted_val:.5f}"
+        entry_p30_1H_new.delete(0, tk.END)
+        entry_p30_1H_new.insert(0, output_str)
+        p30_1H_val = converted_val
+    except Exception as e:
+        entry_p30_1H_new.delete(0, tk.END)
+        entry_p30_1H_new.insert(0, f"Error: {e}")
+
+    try:
+        # Convert p30 19F
+        input_str = entry_p30_19F.get().strip()
+        val = float(input_str)
+        conversion_factor = 1e-6
+        converted_val = val * conversion_factor *2  # Gradient dependent Factor - times 2 Necessary 
+        output_str = f"{converted_val:.5f}"
+        entry_p30_19F_new.delete(0, tk.END)
+        entry_p30_19F_new.insert(0, output_str)
+        p30_19F_val = converted_val
+    except Exception as e:
+        entry_p30_19F_new.delete(0, tk.END)
+        entry_p30_19F_new.insert(0, f"Error: {e}")
+
+    try:
+        max_t = float(entry_Max_TpM.get())
+        gpz6_19F_Percent = float(entry_gpz6_19F.get()) / 100
+        gpz6_1H_Percent = float(entry_gpz6_1H.get()) / 100
+
+        output_19F = max_t * gpz6_19F_Percent
+        output_1H = max_t * gpz6_1H_Percent
+
+        entry_gpz6_19F_new.delete(0, tk.END)
+        entry_gpz6_19F_new.insert(0, f"{output_19F:.5f}")
+
+        entry_gpz6_1H_new.delete(0, tk.END)
+        entry_gpz6_1H_new.insert(0, f"{output_1H:.5f}")
+
+        gpz6_19F_val = output_19F
+        gpz6_1H_val = output_1H
+    except Exception as e:
+        err_msg = f"Error: {e}"
+        entry_gpz6_19F_new.delete(0, tk.END)
+        entry_gpz6_19F_new.insert(0, err_msg)
+        entry_gpz6_1H_new.delete(0, tk.END)
+        entry_gpz6_1H_new.insert(0, err_msg)
+
+    return p30_1H_val, p30_19F_val, gpz6_19F_val, gpz6_1H_val
+
+
+# p30_1H, p30_19F, gpz6_19F, gpz6_1H = converter_fixed()
+# # Now use these variables in your future calculations
+
+
+
+
+
+
+
+
 ######################################
 # VARIBALE FRAME
 ######################################
@@ -805,25 +922,25 @@ frame_Fixed_Values = tk.Frame(frame_input,padx=10, pady=10)
 frame_Fixed_Values.grid(row=0, column=0)
 
 # Label and entry for p30 1H
-label_p30_1H = tk.Label(frame_Fixed_Values, text=r"p30 1H [μS]")  # tkinter does not present LaTeX style greek letters
+label_p30_1H = tk.Label(frame_Fixed_Values, text=r"p30 1H [μS | S]")  # tkinter does not present LaTeX style greek letters
 label_p30_1H.grid(row=1, column=0)
 entry_p30_1H = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT
 entry_p30_1H.grid(row=1, column=1)
 
 # Label and entry for p30 19F (new, directly below 1H)
-label_p30_19F = tk.Label(frame_Fixed_Values, text=r"p30 19F [μS]")
+label_p30_19F = tk.Label(frame_Fixed_Values, text=r"p30 19F [μS | S]")
 label_p30_19F.grid(row=2, column=0)
 entry_p30_19F = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING INTO FLOAT
 entry_p30_19F.grid(row=2, column=1)
 
 # Label and entry for gpz6 1H
-label_gpz6_1H = tk.Label(frame_Fixed_Values, text="gpz6 1H [%]")
+label_gpz6_1H = tk.Label(frame_Fixed_Values, text="gpz6 1H [% | T/m]")
 label_gpz6_1H.grid(row=3, column=0)
 entry_gpz6_1H = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING TO FLOAT
 entry_gpz6_1H.grid(row=3, column=1)
 
 # Label and entry for gpz6 19F (new, directly below 1H)
-label_gpz6_19F = tk.Label(frame_Fixed_Values, text="gpz6 19F [%]")
+label_gpz6_19F = tk.Label(frame_Fixed_Values, text="gpz6 19F [% | T/m]")
 label_gpz6_19F.grid(row=4, column=0)
 entry_gpz6_19F = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING TO FLOAT
 entry_gpz6_19F.grid(row=4, column=1)
@@ -835,9 +952,19 @@ entry_initial_guess = tk.Entry(frame_Fixed_Values, width=5)  # CONVERT STRING IN
 entry_initial_guess.grid(row=5, column=1)
                       #Two ways of entering an exponent                          #Two ways of entering an exponent
                                                                     #implement info which shows how to enter what exactly
+entry_p30_1H_new = tk.Entry(frame_Fixed_Values, width=10)
+entry_p30_1H_new.grid(row=1, column=3)
 
+entry_p30_19F_new = tk.Entry(frame_Fixed_Values, width=10)
+entry_p30_19F_new.grid(row=2, column=3)
 
+entry_gpz6_1H_new = tk.Entry(frame_Fixed_Values, width=10)
+entry_gpz6_1H_new.grid(row=3, column=3)
 
+entry_gpz6_19F_new = tk.Entry(frame_Fixed_Values, width=10)
+entry_gpz6_19F_new.grid(row=4, column=3)
+
+button_convert_fixed = tk.Button(frame_Fixed_Values, text="Convert", command=converter_fixed).grid(row=6, column=1)
 
 
 
