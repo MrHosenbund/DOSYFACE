@@ -25,7 +25,6 @@ def browse_file():
         entry_path.delete(0, tk.END)          # Vorherigen Inhalt im Textfeld löschen
         entry_path.insert(0, filepath)        # Neuen Pfad einfügen
 
-df = None # This will hold the currently loaded DataFrame
 
 
 ####################################
@@ -59,6 +58,7 @@ def import_file_dataframe_text(input_file):
         except Exception as e:
             text_output_dataframe.delete("1.0", tk.END)
             text_output_dataframe.insert(tk.END, f"Fehler beim dataframe Import:\n{e}")
+
 
 
 ###################################################
@@ -210,6 +210,7 @@ row_counter = 1   # Also global row counter
 
 def add_File():
     global row_counter
+    global df
 
     var_gradient = tk.StringVar(value="gpz6")
     var_isotope = tk.StringVar(value="1H")
@@ -247,7 +248,7 @@ def add_File():
                 text_output_integral_info.delete("1.0", tk.END)
                 for line in info:
                     text_output_integral_info.insert(tk.END, line + "\n")
-
+                global df
                 df = import_dataframe(filepath)
                 text_output_dataframe.delete("1.0", tk.END)
                 text_output_dataframe.insert(tk.END, df.to_string())
@@ -433,17 +434,16 @@ def open_ChsANorm_Window():
 
     # === DEFINE the normalization function ===
     def normalize():
+        global df  # access the global dataframe
         try:
-            # Get region index from entry
+            # Get region index from entry widget
+           
             region_index = int(Region_entry.get())
 
-            # Read the global dataframe (or assign your actual df_var here)
-            df = import_dataframe(entry_path.get())
-
-            # Normalize selected column
+            # Normalize selected column by its max value
             normalized = df.iloc[:, region_index] / df.iloc[:, region_index].max()
 
-            # Clear and insert result into output field
+            # Display normalized data in the scrolled text widget
             Normalized_Integral.delete("1.0", tk.END)
             Normalized_Integral.insert(tk.END, normalized.to_string())
         except Exception as e:
@@ -457,6 +457,9 @@ def open_ChsANorm_Window():
     # Save button placeholder (if needed)
     button_save = tk.Button(frame_buttons, text="Save")
     button_save.grid(row=2, column=0, sticky="s", pady=10)
+
+    
+    #potentially add return function - see later
 
 
 #Frame for normalizing and saving settings
