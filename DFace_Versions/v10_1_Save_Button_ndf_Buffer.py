@@ -412,7 +412,7 @@ normalized_data_buffers = {}
 # Global variables to hold window, widget, and buffer
 ndf_window = None
 ndf_result = None
-normalized_data_buffers = {}  # Your buffer dict (make sure it matches your save function)
+  # Your buffer dict (make sure it matches your save function)
 
 def n_df():
     global ndf_window, ndf_result, normalized_data_buffers
