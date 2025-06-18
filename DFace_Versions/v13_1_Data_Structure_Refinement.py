@@ -12,11 +12,21 @@ from matplotlib.figure import Figure
 
 ###############################################################################
 #
-#           V_12_1
-#           this version now want to assign correct y-data!
-#           y-data has to be a normalized array which originates
-#           from the SAVE-button pressing in the choose window!   
-#   
+#           V_13
+#           The calculations function mechanistically 
+#           yet the incorrect diffusion coefficients come out as an result
+#
+#           gpz6 - 1H - D = 6,05E-09
+#           d20 = 0.1 s 
+#          x_data: gpz6 increments:          0.029650, 0.065230, 0.100810, 0.136390, 0.171970, 0.207550, 0.243130, 0.278710, 0.314290, 0.349870, 0.385450, 0.421030, 0.456610, 0.492190, 0.527770, 0.563350
+#                                            0.02965 0.06523 0.10081 0.13639 0.17197 0.20755 0.24313 0.27871 0.31429 0.34987 0.38545 0.42103 0.45661 0.49219 0.52777 0.56335
+#                                             Mine is separated by commas, original script it isnt
+#
+#           X-data is not the problem i think!
+#           Y_data Array is just 0.  not the dataframe.  
+#
+#                                            
+#
 ###############################################################################
 
 
@@ -51,6 +61,7 @@ def browse_file():
 def Import_Info_Button():
     filepath = entry_path.get()
     extract_integral_info(filepath)
+    import_dataframe(filepath)
     import_file_dataframe_text(filepath)
     import_file_integral_info(filepath)
     update_gradient_label_on_import()
@@ -261,17 +272,6 @@ def add_File():
     row_counter += 1
 
 
-#########################################################################
-#
-#
-#
-#
-#               GENERATE FIT USING STEJSKAL TANNER EQUATION
-#
-#
-#
-#########################################################################
-
 
 ############################################
 #
@@ -282,36 +282,9 @@ def add_File():
 gyro_mag_Ratio_1H = (2.675 * 10**8) #gyromagnetic ratio proton (s-1T-1)
 gyro_mag_Ratio_19F = (2.516 * 10**8) #gyromagnetic ratio proton (s-1T-1)
 
-
-#   RADIOBUTTON SELECTION DECIDES WHICH Stejskaltanner will be used
-
-
-
-#Stejskal Tanner Equation
-
-
-
 ##################################################
 #           FIT VARIABLES
 ##################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def plot_into_frame(target_frame):
@@ -542,7 +515,12 @@ def open_ChsANorm_Window():
         global datapoint_row_count
         global normalized_data_buffers
         global current_normalized_array
+
+        global selected_region_index  # globale Variable definieren
+           
         try:
+            region_n = int(Region_entry.get()) - 1  # 0-basierter Index
+            selected_region_index = region_n
             gradient = Variable_gradient.get()
             isotope = Isotope_selection.get()
             region_n = Region_entry.get()
@@ -550,40 +528,34 @@ def open_ChsANorm_Window():
             datapoint_name = f"{gradient}_{isotope}_Region_{region_n}"
 
             if dataset_count.get() == "one":
-                # Update only fixed 0. Datapoints entry
                 Entry_filename.delete(0, tk.END)
                 Entry_filename.insert(0, datapoint_name)
             else:
-                # Add new dynamic datapoint row
                 add_datapoint_row(datapoint_name)
-
-            # Get normalized text
-            normalized_text = Normalized_Integral.get("1.0", tk.END).strip()
-            append_text = f"{normalized_text}"
 
             normalized_text = Normalized_Integral.get("1.0", tk.END).strip()
             current_normalized_array = parse_normalized_text_to_array(normalized_text) 
 
+            print("Current normalized array:", current_normalized_array)  # << print here
+
             # Append normalized text to dictionary buffer keyed by datapoint_name
             if datapoint_name not in normalized_data_buffers:
                 normalized_data_buffers[datapoint_name] = ""
-            normalized_data_buffers[datapoint_name] += append_text
+            normalized_data_buffers[datapoint_name] += normalized_text
 
-            # Prepare full text from all buffers concatenated
             full_text = "\n".join(normalized_data_buffers.values())
 
-            # Update the n_df window content if open
             if ndf_result and ndf_result.winfo_exists():
                 ndf_result.delete("1.0", tk.END)
                 ndf_result.insert(tk.END, full_text)
             else:
-                # Open n_df window and load full buffer content
                 n_df()
                 ndf_result.delete("1.0", tk.END)
                 ndf_result.insert(tk.END, full_text)
 
         except Exception as e:
             print(f"Error updating filename: {e}")
+
 
     button_save = tk.Button(frame_buttons, text="Save", command=save)
     button_save.grid(row=2, column=0, sticky="s", pady=10)
@@ -784,15 +756,17 @@ def compute_gpz6_increments():
 #es ist kein problem output aus rechnungen auch in entry field hinzuzufügen. 
 
 def get_gpz6_array_from_entry():
-    text = entry_gpz6_var.get()  # Get the string from the entry widget
+    text = entry_gpz6_var.get()
     try:
-        # Split by comma, strip spaces, convert to float
-        values = [float(val.strip()) for val in text.split(",") if val.strip()]
+        # Remove all commas
+        clean_text = text.replace(',', ' ')
+        # Split by any whitespace
+        parts = clean_text.split()
+        values = [float(val) for val in parts if val]
         return np.array(values)
     except Exception as e:
         print(f"Error parsing gpz6 array from entry: {e}")
         return None
-
 
 
 ###################################
@@ -906,7 +880,21 @@ One_Multi_d20_Frame.grid(row=1, column=1, padx=5, pady=5)
 #Fixed Values - Frame 
 frame_Fixed_Values = tk.Frame(frame_input,padx=10, pady=10)
 frame_Fixed_Values.grid(row=0, column=0)
+###############################################
+#    
+#
+#               GENERATE FIT BUTTON
+#
+#
+###############################################
 
+#Multiple functions of Gen Fit Button!
+
+#1. Gen button should determine the combination of gradient and isotope to decide which fixed variable to choose from
+
+#combine functions to one button
+# def gen_button():
+#     gradient_Isotope_Combo()
 
 Variable_GPZ6_Fixed_p30_1H = None
 Variable_GPZ6_Fixed_p30_19F = None
@@ -942,7 +930,7 @@ def get_d20_entry():
         return None  # or raise an exception or handle it as you want
 
 
-Label_d20 = tk.Label(One_Multi_d20_Frame, text=r"d20 [S]: ").grid(row=0,column=2)
+Label_d20 = tk.Label(One_Multi_d20_Frame, text=r"d20 [μS]: ").grid(row=0,column=2)
 d20_entry = tk.Entry(One_Multi_d20_Frame, width=10)
 d20_entry.grid(row=0, column=4)
   # float d20 -> able to be inserted into stejskaltanner
@@ -973,7 +961,6 @@ def get_in_guess():
 # #################################
 
 #OPENTASK: Adjust fixed_value variables
-
 def stejskaltanner_p30_1H(gradient_length, D):
     d20 = get_d20_entry()
     p30_1H_val, p30_19F_val, gpz6_19F_val, gpz6_1H_val = converter_fixed()
@@ -999,6 +986,8 @@ def stejskaltanner_gpz6_19F(gradient_strength, D):
 
     #still need to assign specific fixed_val!!!!
 
+    #still need to assign specific fixed_val!!!!
+
 
 ##################################
 #       Radiotbutton-Combination
@@ -1007,7 +996,6 @@ def stejskaltanner_gpz6_19F(gradient_strength, D):
 # Fit-Setting-frame
 #################################
 
-#Helper Function which gets the corresponding stejkaltanner equation to its corresponding combo 
 def get_selected_stejskaltanner_func():
     global selected_combo_label, selected_stejskaltanner_func
 
@@ -1034,11 +1022,27 @@ def get_selected_stejskaltanner_func():
 #   determine diffusion coefficient using curvefit- targeting the stejskaltanne equations
 #
 #######################################
+ # get file path string from Tkinter Entry widget
+
 
 def GENERATE_FIT():
     
-    global current_normalized_array
-    y_data = current_normalized_array
+    global current_normalized_array, selected_region_index
+
+
+    filepath = entry_path.get() 
+
+    y_data = import_dataframe(filepath)
+
+    region_index = selected_region_index  # globale Variable nutzen
+    y_data = y_data.iloc[:, region_index].values # here you choose the column based on region_index you provide in the choose-window
+
+    normalized_y_data = y_data / max(y_data)
+    print(f"Your y-Data is: {normalized_y_data}") #here the data is normalized again for calculations
+
+    if not filepath:
+        print("Kein Dateipfad angegeben!")
+        return
 
     current_combo, model_func = get_selected_stejskaltanner_func()
     initial_guess = 10**-9
@@ -1048,14 +1052,14 @@ def GENERATE_FIT():
       # Convert input string to a list or array
     if current_combo in ["gpz6_1H"]:
         x_data = get_gpz6_array_from_entry()
-           
+        print(f"your X-data is {x_data}")
         try:
             
-            popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
+            popt, pcov = curve_fit(model_func, x_data, normalized_y_data, initial_guess, maxfev=2000)
             # D_gpz6_1H = popt
             # D_gpz6_1H_cov = pcov
 
-            
+
             # Formatierte Parameter-Ausgabe
             params_formatted = ", ".join(f"{p:.5e}" for p in popt)
             # Update your UI or store results as needed
@@ -1070,9 +1074,10 @@ def GENERATE_FIT():
 
     elif current_combo in ["gpz6_19F"]:
         x_data = get_gpz6_array_from_entry()
+        print(f"your X-data is {x_data}")
         try:
             
-            popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
+            popt, pcov = curve_fit(model_func, x_data, normalized_y_data, initial_guess, maxfev=2000)
             # D_gpz6_1H = popt
             # D_gpz6_1H_cov = pcov
 
@@ -1091,9 +1096,10 @@ def GENERATE_FIT():
 
     elif current_combo in ["p30_1H"]:
         x_data = p30_Converted_array()
+        print(f"your X-data is {x_data}")
         try:
             
-            popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
+            popt, pcov = curve_fit(model_func, x_data, normalized_y_data, initial_guess, maxfev=2000)
             # D_gpz6_1H = popt
             # D_gpz6_1H_cov = pcov
 
@@ -1112,9 +1118,10 @@ def GENERATE_FIT():
 
     elif current_combo in ["p30_19F"]:
         x_data = p30_Converted_array()
+        print(f"your X-data is {x_data}")
         try:
             
-            popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
+            popt, pcov = curve_fit(model_func, x_data, normalized_y_data, initial_guess, maxfev=2000)
             # D_gpz6_1H = popt
             # D_gpz6_1H_cov = pcov
 
@@ -1136,8 +1143,6 @@ def GENERATE_FIT():
         print(f"Unknown combo selected: {current_combo}")
 
 
-
-#FINALIZE FIT FUNCTION FOR EVERY OTHER COMBO !! AND PLOT RESULTS !!
 
     # D_p30_1H = curve_fit(stejskaltanner_p30_1H, p30_array, ndf_result, inguess_entry )       
 
@@ -1274,7 +1279,6 @@ p30_Seconds.grid(row=0,column=3)
 
 
 
-
 #label for gpz6 var
 Label_gpz6_var = tk.Label(frame_Variable_Values, text="Var. gpz6 increments:")
 Label_gpz6_var.grid(row=2, column=0)
@@ -1333,6 +1337,45 @@ Button_Compute_Increments.grid(row=4, column=1)
 #       GRAPH & RESULTS
 ######################################
 
+def reset_all():
+    global normalized_data_buffers, current_normalized_array, dynamic_rows, dynamic_row_frames, datapoint_row_count
+
+    # Eingabefelder löschen
+    entry_path.delete(0, tk.END)
+    entry_gpz6_var.delete(0, tk.END)
+    entry_var_p30.delete(0, tk.END)
+    entry_p30_1H.delete(0, tk.END)
+    entry_p30_19F.delete(0, tk.END)
+    entry_gpz6_1H.delete(0, tk.END)
+    entry_gpz6_19F.delete(0, tk.END)
+    entry_initial_guess.delete(0, tk.END)
+    d20_entry.delete(0, tk.END)
+
+    # Textfelder löschen
+    text_output_integral_info.delete("1.0", tk.END)
+    text_output_dataframe.delete("1.0", tk.END)
+    text_output_results.delete("1.0", tk.END)
+
+    # Radiobutton-Variablen zurücksetzen
+    Variable_gradient.set("gpz6")
+    Isotope_selection.set("1H")
+    p30_selection.set("μs")
+    dataset_count.set("one")
+
+    # Buffer und Globals zurücksetzen
+    normalized_data_buffers.clear()
+    current_normalized_array = None
+    dynamic_rows.clear()
+    for frame in dynamic_row_frames:
+        frame.destroy()
+    dynamic_row_frames.clear()
+    datapoint_row_count = 1
+
+    # Optional: Plot löschen, falls du Referenz hast (z.B. canvas.clear() etc.)
+    print("Reset complete!")
+
+button_reset = tk.Button(root, text="Reset All", command=reset_all)
+button_reset.grid(row=3, column=0, padx=5, pady=10, sticky="w")
 
 #Graph Frame for Graph
 frame_Graph = tk.LabelFrame(root, text="Graphical Results",padx=0, pady=5 )

@@ -12,12 +12,18 @@ from matplotlib.figure import Figure
 
 ###############################################################################
 #
-#           V_12_1
-#           this version now want to assign correct y-data!
-#           y-data has to be a normalized array which originates
-#           from the SAVE-button pressing in the choose window!
-#          
-#   
+#           V_13
+#           The calculations function mechanistically 
+#           yet the incorrect diffusion coefficients come out as an result
+#
+#           gpz6 - 1H - D = 6,05E-09
+#           d20 = 0.1 s 
+#          x_data: gpz6 increments:          0.029650, 0.065230, 0.100810, 0.136390, 0.171970, 0.207550, 0.243130, 0.278710, 0.314290, 0.349870, 0.385450, 0.421030, 0.456610, 0.492190, 0.527770, 0.563350
+#                                            0.02965 0.06523 0.10081 0.13639 0.17197 0.20755 0.24313 0.27871 0.31429 0.34987 0.38545 0.42103 0.45661 0.49219 0.52777 0.56335
+#                                             Mine is separated by commas, original script it isnt
+#
+#                                            
+#
 ###############################################################################
 
 
