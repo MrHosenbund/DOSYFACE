@@ -800,7 +800,7 @@ def get_gpz6_array_from_entry():
 #       VAR P30 CONVERTER
 ###################################
 
-def  p30_converter():
+def  p30_Converted_array():
     try:
         entry_p30_input = entry_var_p30.get()
         str_values = [s.strip() for s in entry_p30_input.split(",")]
@@ -907,21 +907,7 @@ One_Multi_d20_Frame.grid(row=1, column=1, padx=5, pady=5)
 #Fixed Values - Frame 
 frame_Fixed_Values = tk.Frame(frame_input,padx=10, pady=10)
 frame_Fixed_Values.grid(row=0, column=0)
-###############################################
-#    
-#
-#               GENERATE FIT BUTTON
-#
-#
-###############################################
 
-#Multiple functions of Gen Fit Button!
-
-#1. Gen button should determine the combination of gradient and isotope to decide which fixed variable to choose from
-
-#combine functions to one button
-# def gen_button():
-#     gradient_Isotope_Combo()
 
 Variable_GPZ6_Fixed_p30_1H = None
 Variable_GPZ6_Fixed_p30_19F = None
@@ -989,14 +975,16 @@ def get_in_guess():
 
 #OPENTASK: Adjust fixed_value variables
 
-def stejskaltanner_p30_1H(p30_1H_val, D):
+def stejskaltanner_p30_1H(gradient_length, D):
     d20 = get_d20_entry()
-    return np.exp(-((gyro_mag_Ratio_1H)**2 * gradient_strength**2 * p30_1H_val**2 * (2/np.pi)**2 * D * (d20 - p30_1H_val / 3)))
+    p30_1H_val, p30_19F_val, gpz6_19F_val, gpz6_1H_val = converter_fixed()
+    return np.exp(-((gyro_mag_Ratio_1H)**2 * gpz6_1H_val**2 * gradient_length**2 * (2/np.pi)**2 * D * (d20 - gradient_length / 3)))
 
 
-def stejskaltanner_p30_19F(p30_19F_val, D):
+def stejskaltanner_p30_19F(gradient_length, D):
     d20 = get_d20_entry()
-    return np.exp(-((gyro_mag_Ratio_19F)**2 * gradient_strength**2 * p30_19F_val**2 * (2/np.pi)**2 * D * (d20 - p30_19F_val/ 3))) 
+    p30_1H_val, p30_19F_val, gpz6_19F_val, gpz6_1H_val = converter_fixed()
+    return np.exp(-((gyro_mag_Ratio_19F)**2 * gpz6_19F_val**2 * gradient_length**2 * (2/np.pi)**2 * D * (d20 - gradient_length/ 3))) 
 
 
 def stejskaltanner_gpz6_1H(gradient_strength, D):
@@ -1005,9 +993,10 @@ def stejskaltanner_gpz6_1H(gradient_strength, D):
     return np.exp(-((gyro_mag_Ratio_1H)**2 * gradient_strength**2 * p30_1H_val**2 * (2/np.pi)**2 * D * (d20 - p30_1H_val / 3))) 
 #currently p30_1H_val is a tuple, not a float
 
-def stejskaltanner_gpz6_19F(gpz6_19F_val, D):
+def stejskaltanner_gpz6_19F(gradient_strength, D):
     d20 = get_d20_entry()
-    return np.exp(-((gyro_mag_Ratio_19F)**2 * gpz6_19F_val**2 * gradient_Length**2 * (2/np.pi)**2 * D * (d20 - gradient_length / 3))) 
+    p30_1H_val, p30_19F_val, gpz6_19F_val, gpz6_1H_val = converter_fixed()
+    return np.exp(-((gyro_mag_Ratio_19F)**2 * gradient_strength**2 * p30_19F_val**2 * (2/np.pi)**2 * D * (d20 - p30_19F_val / 3))) 
 
     #still need to assign specific fixed_val!!!!
 
@@ -1019,6 +1008,7 @@ def stejskaltanner_gpz6_19F(gpz6_19F_val, D):
 # Fit-Setting-frame
 #################################
 
+#Helper Function which gets the corresponding stejkaltanner equation to its corresponding combo 
 def get_selected_stejskaltanner_func():
     global selected_combo_label, selected_stejskaltanner_func
 
@@ -1052,16 +1042,16 @@ def GENERATE_FIT():
     y_data = current_normalized_array
 
     current_combo, model_func = get_selected_stejskaltanner_func()
-    
+    initial_guess = get_in_guess()
     #y data ist noch nicht wirklich read
     # Prepare your data - these must be numeric arrays
     ### Implement a function to extract numeric data from text widget
-    initial_guess = get_in_guess()  # Convert input string to a list or array
+      # Convert input string to a list or array
     if current_combo in ["gpz6_1H"]:
         x_data = get_gpz6_array_from_entry()
            
         try:
-            # Use a lambda to fix fixed_val parameter in model function during fitting
+            
             popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
             # D_gpz6_1H = popt
             # D_gpz6_1H_cov = pcov
@@ -1078,9 +1068,77 @@ def GENERATE_FIT():
             print(f"Curve fit failed for {current_combo}: {e}")
             text_output_results.delete("1.0", tk.END)
             text_output_results.insert(tk.END, f"Fit failed: {e}")
-    else:   
+
+    elif current_combo in ["gpz6_19F"]:
+        x_data = get_gpz6_array_from_entry()
+        try:
+            
+            popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
+            # D_gpz6_1H = popt
+            # D_gpz6_1H_cov = pcov
+
+
+            # Formatierte Parameter-Ausgabe
+            params_formatted = ", ".join(f"{p:.5e}" for p in popt)
+            # Update your UI or store results as needed
+            text_output_results.delete("1.0", tk.END)
+            text_output_results.insert(tk.END, f"Fit result for {current_combo}: D = [{params_formatted}]\n")
+            text_output_results.insert(tk.END, f"Covariance matrix:\n{pcov}")
+
+        except Exception as e:
+            print(f"Curve fit failed for {current_combo}: {e}")
+            text_output_results.delete("1.0", tk.END)
+            text_output_results.insert(tk.END, f"Fit failed: {e}")
+
+    elif current_combo in ["p30_1H"]:
+        x_data = p30_Converted_array()
+        try:
+            
+            popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
+            # D_gpz6_1H = popt
+            # D_gpz6_1H_cov = pcov
+
+
+            # Formatierte Parameter-Ausgabe
+            params_formatted = ", ".join(f"{p:.5e}" for p in popt)
+            # Update your UI or store results as needed
+            text_output_results.delete("1.0", tk.END)
+            text_output_results.insert(tk.END, f"Fit result for {current_combo}: D = [{params_formatted}]\n")
+            text_output_results.insert(tk.END, f"Covariance matrix:\n{pcov}")
+
+        except Exception as e:
+            print(f"Curve fit failed for {current_combo}: {e}")
+            text_output_results.delete("1.0", tk.END)
+            text_output_results.insert(tk.END, f"Fit failed: {e}")
+
+    elif current_combo in ["p30_19F"]:
+        x_data = p30_Converted_array()
+        try:
+            
+            popt, pcov = curve_fit(model_func, x_data, y_data, initial_guess, maxfev=2000)
+            # D_gpz6_1H = popt
+            # D_gpz6_1H_cov = pcov
+
+
+            # Formatierte Parameter-Ausgabe
+            params_formatted = ", ".join(f"{p:.5e}" for p in popt)
+            # Update your UI or store results as needed
+            text_output_results.delete("1.0", tk.END)
+            text_output_results.insert(tk.END, f"Fit result for {current_combo}: D = [{params_formatted}]\n")
+            text_output_results.insert(tk.END, f"Covariance matrix:\n{pcov}")
+
+        except Exception as e:
+            print(f"Curve fit failed for {current_combo}: {e}")
+            text_output_results.delete("1.0", tk.END)
+            text_output_results.insert(tk.END, f"Fit failed: {e}")
+        
+    else:
+
         print(f"Unknown combo selected: {current_combo}")
 
+
+
+#FINALIZE FIT FUNCTION FOR EVERY OTHER COMBO !! AND PLOT RESULTS !!
 
     # D_p30_1H = curve_fit(stejskaltanner_p30_1H, p30_array, ndf_result, inguess_entry )       
 
@@ -1212,8 +1270,7 @@ p30_milliSeconds.grid(row=0,column=2)
 p30_Seconds = tk.Radiobutton(frame_Variable_Values, text="S", variable=p30_selection, value="s")
 p30_Seconds.grid(row=0,column=3)
 
-Button_Converter = tk.Button(frame_Variable_Values, text="convert into S", command= p30_converter)        
-Button_Converter.grid(row=1, column=4)
+
 
 
 
