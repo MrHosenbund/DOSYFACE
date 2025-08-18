@@ -295,7 +295,7 @@ def plot_into_frame(target_frame):
     # Example data to plot
     x = [1, 2, 3, 4, 5]
     y = [10, 20, 15, 30, 25]
-    ax.plot(x, y, label="Example Curve")
+    ax.plot(x, y, label="Data Curve")
     ax.set_title("My Plot")
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
